@@ -8,8 +8,8 @@ def int_main(filename, savename, varnames,
              latname, lonname, mlat, mlon,
              L0, N0=512, Nlim=0, NL=None,
              depname=None, timname=None,
-             tb=(None, None), zb=(None, None),
-             yb=(None, None), xb=(None, None),
+             tb=None, zb=None,
+             yb=None, xb=None,
              Lind=None, method='cubic', parallel=False):
 
     N = N0 - Nlim
@@ -163,7 +163,7 @@ def int_var(var_in, lat_inr, lon_inr,
                     print(str(round((l+1)/NL*t/NT*100, 2))+'%')
                     var_out[t, l] = griddata((lon_inr, lat_inr),
                                              var_in[t, l].ravel(),
-                                             (lon_outr,lat_outr),
+                                             (lon_outr, lat_outr),
                                              method=method).reshape((N, N))
         else:
             for t in range(NT):

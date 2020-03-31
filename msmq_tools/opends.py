@@ -1,66 +1,105 @@
 import numpy as np
 import xarray as xr
+from tools import int2iterable
 
 
 def load_main(filename, varnames, latname, lonname,
               NL, depname=None, timname=None, ind=None,
-              tb=(None, None), zb=(None, None),
-              yb=(None, None), xb=(None, None)):
+              tb=None, zb=None, yb=None, xb=None):
+    """
+    Loading data function. Lets load data from 1 file and from breakds
+    splitted files if ind is provided.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to be open.
+    varnames : list of str
+        Name of the vars to be extracted and saved in the splitted files.
+    latname : str
+        Name of the latitude variable.
+    lonname : str
+        Name of the longitude variable.
+    NL : list of ints.
+        Vertical number of layers matching varnames.
+        Must be set to 0 for the variables that have no dependence in depth.
+    depname : str, optional
+        Name of the depth variable. The default is None.
+    timname : str, optional
+        Name of the time variable. The default is None.
+    ind : tuple, optional
+        If the file or files to be loaded come from a partition from breakds
+        a tuple with the index must be provided (Z, Y, X). Where X, Y, Z
+        are the respective index in each dimension (floats or array like).
+        In that case the loaded data will be appended.
+    tb : float or array like, optional
+        Subset to be extracted in the time dimension. The default is None.
+    zb : float or array like, optional
+        Subset to be extracted in the z dimension. The default is None.
+    yb : float or array like, optional
+        Subset to be extracted in the y dimension. The default is None.
+    xb : float or array like, optional
+        Subset to be extracted in the x dimension. The default is None.
+
+    Returns
+    -------
+    vars, lat, lon, tim, dep: tuple
+        Tuple of the list of variables, latitudes, longitudes,
+        times (if timname is not None), depths (if depname is not None)
+    """
 
     if ind is None:
         return load_1file(filename, varnames, latname, lonname,
                           depname, timname, NL, tb, zb, yb, xb)
     else:
         return load_split(filename, varnames, latname, lonname,
-                          depname, timname, NL, ind)
+                          depname, timname, NL, ind, tb)
 
 
 def load_1file(filename, varnames, latname, lonname,
                depname, timname, NL, tb, zb, yb, xb):
+    """
+    Load data from 1 file.
+    Check the documentation of load_main for more information.
+    """
 
     vars_in = []
     dep_in = None
     tim_in = None
 
+    # Read values
     with xr.open_dataset(filename+'.nc') as data:
         for i in range(len(varnames)):
             if NL[i] > 0:
-                vars_in.append(data[varnames[i]].values[tb[0]:tb[1],
-                                                        zb[0]:zb[1],
-                                                        yb[0]:yb[1],
-                                                        xb[0]:xb[1]])
+                vars_in.append(data[varnames[i]].values[tb, zb, yb, xb])
             else:
-                vars_in.append(data[varnames[i]].values[tb[0]:tb[1],
-                                                        yb[0]:yb[1],
-                                                        xb[0]:xb[1]])
-        lat_in = data[latname].values[yb[0]:yb[1],
-                                      xb[0]:xb[1]]
-        lon_in = data[lonname].values[yb[0]:yb[1],
-                                      xb[0]:xb[1]]
+                vars_in.append(data[varnames[i]].values[tb, yb, xb])
+        lat_in = data[latname].values[yb, xb]
+        lon_in = data[lonname].values[yb, xb]
         if depname is not None:
-            dep_in = data[depname].values[zb[0]:zb[1]]
+            dep_in = data[depname].values[zb]
         if timname is not None:
-            tim_in = data[timname].values[tb[0]:tb[1]]
+            tim_in = data[timname].values[tb]
 
     return vars_in, lat_in, lon_in, tim_in, dep_in
 
 
 def load_split(filename, varnames, latname, lonname,
-               NL, depname, timname, ind):
+               NL, depname, timname, ind, tb):
+    """
+    Load splitted data.
+    Check the documentation of load_main for more information.
+    """
 
-    def int2iterable(val):
-        if type(val) is int:
-            return [val]
-        else:
-            return val
-
+    # Transform the floats to iterables
     indk = int2iterable(ind[0])
     indj = int2iterable(ind[1])
     indi = int2iterable(ind[2])
 
     tim_in = None
-
     nvars = len(varnames)
+
+    # Loop appending the values
     vars_k = [np.array([]) for v in range(nvars)]
     dep_k = np.array([])
     for k in indk:
@@ -74,14 +113,14 @@ def load_split(filename, varnames, latname, lonname,
                 with xr.open_dataset(filenamekji+'.nc') as data:
                     for v in range(nvars):
                         vars_i[v] = np.append(vars_i[v],
-                                              data[varnames[v]].values,
+                                              data[varnames[v]].values[tb],
                                               axis=-1)
                     lat_i = np.append(lat_i, data[latname].values, axis=-1)
                     lon_i = np.append(lon_i, data[lonname].values, axis=-1)
                     if depname is not None:
                         dep_in = data[depname].values
                     if timname is not None:
-                        tim_in = data[timname].values
+                        tim_in = data[timname].values[tb]
             for v in range(nvars):
                 vars_j[v] = np.append(vars_j, vars_i, axis=-2)
             lat_j = np.append(lat_j, lat_i, axis=-2)

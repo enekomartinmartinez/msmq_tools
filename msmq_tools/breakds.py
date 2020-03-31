@@ -1,13 +1,54 @@
-import numpy as np
 import xarray as xr
 from opends import load_1file
+from tools import create_partition
 
 
 def breakds(filename, varnames, latname, lonname,
             NL, Nbx=1, Nby=1, Nbz=1,
             depname=None, timname=None,
-            tb=(None, None), zb=(None, None),
-            yb=(None, None), xb=(None, None)):
+            tb=None, zb=None, yb=None, xb=None):
+    """
+    Breaking function to split a big dataset in smaller one.
+    From file filename.nc will create filename_Z_Y_X.nc, where Z, Y, X
+    are the partition number in each respective axis.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the original file.
+    varnames : list of str
+        Name of the vars to be extracted and saved in the splitted files.
+    latname : str
+        Name of the latitude variable.
+    lonname : str
+        Name of the longitude variable.
+    NL : list of ints.
+        Vertical number of layers matching varnames.
+        Must be set to 0 for the variables that have no dependence in depth.
+    Nbx : int, optional
+        Number of partitions to be made in the x axis. The default is 1.
+    Nby : int, optional
+        Number of partitions to be made in the y axis. The default is 1.
+    Nbz : int, optional
+        Number of partitions to be made in the z axis. The default is 1.
+    depname : str, optional
+        Name of the depth variable. The default is None.
+    timname : str, optional
+        Name of the time variable. The default is None.
+    tb : float or array like, optional
+        Subset to be extracted in the time dimension. The default is None.
+    zb : float or array like, optional
+        Subset to be extracted in the z dimension. The default is None.
+    yb : float or array like, optional
+        Subset to be extracted in the y dimension. The default is None.
+    xb : float or array like, optional
+        Subset to be extracted in the x dimension. The default is None.
+
+    Returns
+    -------
+    None.
+
+    """
 
     #############
     # LOAD DATA #
@@ -20,20 +61,14 @@ def breakds(filename, varnames, latname, lonname,
                                              depname, timname, NL,
                                              tb=tb, zb=zb, yb=yb, xb=xb)
 
-    def create_partition(Npar, Ndots):
-        Ndpp = np.arange(Npar+1)
-        if (Ndots % Npar) == 0:
-            Ndpp *= int(Ndots/Npar)
-        else:
-            Ndpp *= int(Ndots/Npar)+1
-            Ndpp[-1] = Ndots
-        return Ndpp
-
     svar = vars_in.shape
-    # NT = svar[0]
     Nk = create_partition(Nbz, svar[1])
     Nj = create_partition(Nby, svar[2])
     Ni = create_partition(Nbx, svar[3])
+
+    #############
+    # SAVE DATA #
+    #############
 
     print("Saving data")
     for k in range(Nbz):
