@@ -5,11 +5,13 @@
 #     Name of the region where the interpolation is done                 #
 # - parallel: (bool)                                                     #
 #     True for parallelize interpolation in time dimension               #
+# - Nproc: (int)                                                         #
+#     Number of cores to be used                                         #
 ##########################################################################
 
 region = 'GULF'
-dateL = 'X_1h_20100220_20100316'
-dateR = '20100301-20100301'
+dateL = '_1h_20090829_20090902'
+dateR = '20090901-20090901'
 parallel = True
 Nproc = 2
 
@@ -39,6 +41,9 @@ filename_sal = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridS_' + dateR
 filename_den = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridD_' + dateR
+filename_mas = path2data + 'eNATL60E' + region + '-BLBT02'\
+               + dateL + '_mask_' + dateR
+
 temname = 'votemper'
 salname = 'vosaline'
 denname = 'pdens'
@@ -92,10 +97,6 @@ path2save = path2data
 #     True for split the data in sub-boxes                               #
 # - Nb: (tuple of 3 int)                                                 #
 #     Number of divisions in z, y, x dimensions                          #
-# - Nby: (int)                                                           #
-#     Number of divisions in y dimension                                 #
-# - Nbz: (int)                                                           #
-#     Number of divisions in z dimension                                 #
 ##########################################################################
 
 split = False

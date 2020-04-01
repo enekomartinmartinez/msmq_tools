@@ -24,10 +24,11 @@ def load_main(filename, varnames, latname, lonname,
     timname : str, optional
         Name of the time variable. The default is None.
     ind : tuple, optional
-        If the file or files to be loaded come from a partition from breakds
+        If the file(s) to be loaded come(s) from a partition from breakds
         a tuple with the index must be provided (Z, Y, X). Where X, Y, Z
         are the respective index in each dimension (floats or array like).
         In that case the loaded data will be appended.
+        The default is None.
 
     Returns
     -------
