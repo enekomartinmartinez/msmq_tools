@@ -4,9 +4,8 @@ from tools import create_partition
 
 
 def breakds(filename, varnames, latname, lonname,
-            NL, Nbx=1, Nby=1, Nbz=1,
-            depname=None, timname=None,
-            tb=None, zb=None, yb=None, xb=None):
+            Nbx=1, Nby=1, Nbz=1,
+            depname=None, timname=None):
     """
     Breaking function to split a big dataset in smaller one.
     From file filename.nc will create filename_Z_Y_X.nc, where Z, Y, X
@@ -22,9 +21,6 @@ def breakds(filename, varnames, latname, lonname,
         Name of the latitude variable.
     lonname : str
         Name of the longitude variable.
-    NL : list of ints.
-        Vertical number of layers matching varnames.
-        Must be set to 0 for the variables that have no dependence in depth.
     Nbx : int, optional
         Number of partitions to be made in the x axis. The default is 1.
     Nby : int, optional
@@ -35,14 +31,6 @@ def breakds(filename, varnames, latname, lonname,
         Name of the depth variable. The default is None.
     timname : str, optional
         Name of the time variable. The default is None.
-    tb : float or array like, optional
-        Subset to be extracted in the time dimension. The default is None.
-    zb : float or array like, optional
-        Subset to be extracted in the z dimension. The default is None.
-    yb : float or array like, optional
-        Subset to be extracted in the y dimension. The default is None.
-    xb : float or array like, optional
-        Subset to be extracted in the x dimension. The default is None.
 
     Returns
     -------
@@ -58,8 +46,7 @@ def breakds(filename, varnames, latname, lonname,
 
     vars_in, lat, lon, tim, dep = load_1file(filename, varnames,
                                              latname, lonname,
-                                             depname, timname, NL,
-                                             tb=tb, zb=zb, yb=yb, xb=xb)
+                                             depname, timname)
 
     svar = vars_in.shape
     Nk = create_partition(Nbz, svar[1])
@@ -82,7 +69,7 @@ def breakds(filename, varnames, latname, lonname,
                                 lat[Nj[j]:Nj[j+1],
                                     Ni[i]:Ni[i+1]])}
                 for v in range(len(varnames)):
-                    if NL[v] > 0:
+                    if len(vars_in[v].shape) == 4:
                         ds[varnames[v]] = (('t', 'z', 'y', 'x'),
                                            vars_in[v][:
                                                       Nk[j]:Nk[j+1],

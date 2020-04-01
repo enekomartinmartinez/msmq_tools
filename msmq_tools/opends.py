@@ -1,11 +1,10 @@
 import numpy as np
 import xarray as xr
-from tools import int2iterable
+from msmq_tools.tools import int2iterable
 
 
 def load_main(filename, varnames, latname, lonname,
-              NL, depname=None, timname=None, ind=None,
-              tb=None, zb=None, yb=None, xb=None):
+              depname=None, timname=None, ind=None):
     """
     Loading data function. Lets load data from 1 file and from breakds
     splitted files if ind is provided.
@@ -20,9 +19,6 @@ def load_main(filename, varnames, latname, lonname,
         Name of the latitude variable.
     lonname : str
         Name of the longitude variable.
-    NL : list of ints.
-        Vertical number of layers matching varnames.
-        Must be set to 0 for the variables that have no dependence in depth.
     depname : str, optional
         Name of the depth variable. The default is None.
     timname : str, optional
@@ -32,14 +28,6 @@ def load_main(filename, varnames, latname, lonname,
         a tuple with the index must be provided (Z, Y, X). Where X, Y, Z
         are the respective index in each dimension (floats or array like).
         In that case the loaded data will be appended.
-    tb : float or array like, optional
-        Subset to be extracted in the time dimension. The default is None.
-    zb : float or array like, optional
-        Subset to be extracted in the z dimension. The default is None.
-    yb : float or array like, optional
-        Subset to be extracted in the y dimension. The default is None.
-    xb : float or array like, optional
-        Subset to be extracted in the x dimension. The default is None.
 
     Returns
     -------
@@ -50,14 +38,14 @@ def load_main(filename, varnames, latname, lonname,
 
     if ind is None:
         return load_1file(filename, varnames, latname, lonname,
-                          depname, timname, NL, tb, zb, yb, xb)
+                          depname, timname)
     else:
         return load_split(filename, varnames, latname, lonname,
-                          depname, timname, NL, ind, tb)
+                          depname, timname, ind)
 
 
 def load_1file(filename, varnames, latname, lonname,
-               depname, timname, NL, tb, zb, yb, xb):
+               depname, timname):
     """
     Load data from 1 file.
     Check the documentation of load_main for more information.
@@ -70,22 +58,19 @@ def load_1file(filename, varnames, latname, lonname,
     # Read values
     with xr.open_dataset(filename+'.nc') as data:
         for i in range(len(varnames)):
-            if NL[i] > 0:
-                vars_in.append(data[varnames[i]].values[tb, zb, yb, xb])
-            else:
-                vars_in.append(data[varnames[i]].values[tb, yb, xb])
-        lat_in = data[latname].values[yb, xb]
-        lon_in = data[lonname].values[yb, xb]
+            vars_in.append(data[varnames[i]].values)
+        lat_in = data[latname].values
+        lon_in = data[lonname].values
         if depname is not None:
-            dep_in = data[depname].values[zb]
+            dep_in = data[depname].values
         if timname is not None:
-            tim_in = data[timname].values[tb]
+            tim_in = data[timname].values
 
     return vars_in, lat_in, lon_in, tim_in, dep_in
 
 
 def load_split(filename, varnames, latname, lonname,
-               NL, depname, timname, ind, tb):
+               depname, timname, ind):
     """
     Load splitted data.
     Check the documentation of load_main for more information.
@@ -113,20 +98,20 @@ def load_split(filename, varnames, latname, lonname,
                 with xr.open_dataset(filenamekji+'.nc') as data:
                     for v in range(nvars):
                         vars_i[v] = np.append(vars_i[v],
-                                              data[varnames[v]].values[tb],
+                                              data[varnames[v]].values,
                                               axis=-1)
                     lat_i = np.append(lat_i, data[latname].values, axis=-1)
                     lon_i = np.append(lon_i, data[lonname].values, axis=-1)
                     if depname is not None:
                         dep_in = data[depname].values
                     if timname is not None:
-                        tim_in = data[timname].values[tb]
+                        tim_in = data[timname].values
             for v in range(nvars):
                 vars_j[v] = np.append(vars_j, vars_i, axis=-2)
             lat_j = np.append(lat_j, lat_i, axis=-2)
             lon_j = np.append(lon_j, lon_i, axis=-2)
         for v in range(nvars):
-            if NL[v] > 0:
+            if len(vars_j.shape) == 4:
                 vars_k[v] = np.append(vars_k, vars_j, axis=-3)
             else:
                 vars_k[v] = vars_j

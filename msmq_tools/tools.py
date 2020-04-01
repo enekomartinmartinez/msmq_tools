@@ -45,3 +45,22 @@ def int2iterable(val):
         return [val]
     else:
         return val
+
+def split_iterable(ite, x):
+    """
+    Splits a iterable in a given length sublist.
+
+    Parameters
+    ----------
+    ite : array like
+        iterable to be splitted.
+    x : int
+        length of the sublists.
+
+    Returns
+    -------
+    List
+        Splitted list.
+
+    """
+    return [ite[i:i+x] for i in range(0, len(ite), x)]
