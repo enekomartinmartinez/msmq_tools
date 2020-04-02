@@ -99,9 +99,9 @@ def den_main(filename_tem, filename_sal, savename,
         # Run in series
         else:
             print("Processing {} files".format(totl))
-            for i in range(totl):
+            for i, kji_ in enumerate(kji_com):
                 print("\t{:.2f}%".format(100.*i/totl))
-                den_kji(kji_com[i])
+                den_kji(kji_)
 
 
 def den_1file(filename_tem, filename_sal, savename, temname,
@@ -131,11 +131,6 @@ def den_1file(filename_tem, filename_sal, savename, temname,
         [sal], lats, lons, tim, deps = load_main(filename_sal, [salname],
                                                  latname, lonname,
                                                  depname, timname)
-
-    # Remove data from very high depth
-    #if max_dep is not None:
-    #    ind = (deps < max_dep)
-    #    sal, tem, deps = sal[:, ind, :, :], tem[:, ind, :, :], deps[ind]
 
     pdens = np.empty_like(sal)
     dim = lats.shape
@@ -182,4 +177,3 @@ def den_1file(filename_tem, filename_sal, savename, temname,
 
     ds = xr.Dataset(ds)
     ds.to_netcdf(savename+'.nc')
-

@@ -58,8 +58,8 @@ def load_1file(filename, varnames, latname, lonname,
 
     # Read values
     with xr.open_dataset(filename+'.nc') as data:
-        for i in range(len(varnames)):
-            vars_in.append(data[varnames[i]].values)
+        for varn in varnames:
+            vars_in.append(data[varn].values)
         lat_in = data[latname].values
         lon_in = data[lonname].values
         if depname is not None:

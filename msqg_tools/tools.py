@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def create_partition(Npar, Ndots):
     """
     Creates a array with the indexis to split the data.
@@ -45,6 +46,7 @@ def int2iterable(val):
         return [val]
     else:
         return val
+
 
 def split_iterable(ite, x):
     """

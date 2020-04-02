@@ -1,10 +1,12 @@
+import dask
 import numpy as np
 import xarray as xr
-from msqg_tools.opends import load_main
+from msqg_tools.opends import load_1file
 from msqg_tools.breakds import breakds
+from msqg_tools.tools import int2iterable, split_iterable
 
 
-def mask_main(filename, savename, latname, lonname, 
+def mask_main(filename, savename, latname, lonname,
               Nproc=1, ind=None, Nb=None):
     """
     Creates a mask of are values for a file or a set of splitted files.
@@ -14,6 +16,8 @@ def mask_main(filename, savename, latname, lonname,
     ----------
     filename : str
         Name of the file to be open.
+    savename : str
+        Name of the file to be saved.
     latname : str
         Name of the latitude variable.
     lonname : str
@@ -41,7 +45,7 @@ def mask_main(filename, savename, latname, lonname,
             k, j, i = kji
             fname = filename + '_' + str(k) + '_' + str(j) + '_' + str(i)
             fsave = savename + '_' + str(k) + '_' + str(j) + '_' + str(i)
-            mask_1file(fname, sname, latname, lonname, ind, None)
+            mask_1file(fname, fsave, latname, lonname, ind, None)
             return 1
 
         # Get iterables for the 3 index and call combinations
@@ -69,9 +73,9 @@ def mask_main(filename, savename, latname, lonname,
         # Run in series
         else:
             print("Processing {} files".format(totl))
-            for i in range(totl):
+            for i, kji_ in enumerate(kji_com):
                 print("\t{:.2f}%".format(100.*i/totl))
-                mask_kji(kji_com[i])
+                mask_kji(kji_)
 
 
 def mask_1file(filename, savename, latname, lonname, ind, Nb):
@@ -84,7 +88,8 @@ def mask_1file(filename, savename, latname, lonname, ind, Nb):
     # LOAD DATA #
     #############
 
-    _, lats, lons, _, _ = load_main(filename, [], latname, lonname, ind)
+    _, lats, lons, _, _ = load_1file(filename, [], latname, lonname,
+                                     None, None)
 
     dlat = np.gradient(lats)
     dlon = np.gradient(lons)
@@ -107,5 +112,3 @@ def mask_1file(filename, savename, latname, lonname, ind, Nb):
         # Save splitted data
         breakds(savename, ['mask'], latname, lonname,
                 Nb=Nb, passvalues=([mask], lats, lons, None, None))
-
-    

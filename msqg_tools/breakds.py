@@ -45,7 +45,7 @@ def breakds(filename, varnames, latname, lonname,
         # LOAD DATA #
         #############
         print("Loading data")
-    
+
         vars_in, lat, lon, tim, dep = load_1file(filename, varnames,
                                                  latname, lonname,
                                                  depname, timname)
@@ -92,7 +92,7 @@ def breakds(filename, varnames, latname, lonname,
                                            vars_in[v][Nj[j]:Nj[j+1],
                                                       Ni[i]:Ni[i+1]])
                 if depname is not None:
-                    ds[depname] = (('z'), dep)
+                    ds[depname] = (('z'), dep[Nk[j]:Nk[j+1]])
                 if timname is not None:
                     ds[timname] = (('t'), tim)
                 ds = xr.Dataset(ds)
