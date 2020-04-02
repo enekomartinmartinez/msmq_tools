@@ -9,9 +9,13 @@
 #     Number of cores to be used                                         #
 ##########################################################################
 
-region = 'GULF'
-dateL = '_1h_20090829_20090902'
-dateR = '20090901-20090901'
+region = 'OSMO'
+#date = 'y2009m09d01'
+date = 'y2010m03d01'
+#dateL = '_1h_20090829_20090902'
+dateL = 'X_1h_20100220_20100316'
+#dateR = '20090901-20090901'
+dateR = '20100301-20100301'
 parallel = True
 Nproc = 2
 
@@ -33,7 +37,7 @@ Nproc = 2
 #     Name of the time variable to be loaded                             #
 ##########################################################################
 
-path2data = '/mnt/meom/workdir/martiene/DATA/split/E'+region+'/'
+path2data = '/mnt/meom/workdir/martiene/DATA/E'+region+'/'
 
 filename_tem = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridT_' + dateR
@@ -41,9 +45,12 @@ filename_sal = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridS_' + dateR
 filename_den = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridD_' + dateR
-filename_mas = path2data + 'eNATL60E' + region + '-BLBT02'\
-               + dateL + '_mask_' + dateR
+filename_mas = path2data + 'eNATL60E' + region + '-BLBT02_'\
+               + 'mask'
+filename_ssh = path2data + 'eNATL60E' + region + '-BLBT02_'\
+               + date + '.1h_sossheig'
 
+sshname = 'sossheig'
 temname = 'votemper'
 salname = 'vosaline'
 denname = 'pdens'
