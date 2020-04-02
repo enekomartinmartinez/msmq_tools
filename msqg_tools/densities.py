@@ -159,9 +159,11 @@ def den_1file(filename_tem, filename_sal, savename, temname,
     else:
         for j in range(dim[0]):
             for i in range(dim[1]):
-                pdens[:, :, j, i] = pden(sal[:, :, j, i],
-                                         tem[:, :, j, i],
-                                         pres(deps, lats[j, i]))
+                pre = pres(deps, lats[j, i])
+                for t in range(sal.shape[0]):
+                    pdens[t, :, j, i] = pden(sal[t, :, j, i],
+                                         tem[t, :, j, i],
+                                         pre)
 
     #############
     # SAVE DATA #

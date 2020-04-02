@@ -5,7 +5,7 @@ from msqg_tools.opends import load_1file
 from msqg_tools.tools import int2iterable, split_iterable
 
 
-def average_main(filename, maskname, savename, varname, latname, lonname,
+def average_main(filename, maskname, varname, latname, lonname,
                  depname=None, timname=None, gridval=None,
                  Nproc=1, ind=None):
     """
@@ -67,6 +67,7 @@ def average_main(filename, maskname, savename, varname, latname, lonname,
         indi = int2iterable(ind[2])
 
         dep = np.array([])
+        f_var = np.array([])
         for k in indk:
             outs = []
             kji_com = [(k, j, i) for j in indj for i in indi]
@@ -94,38 +95,43 @@ def average_main(filename, maskname, savename, varname, latname, lonname,
                     print("\t{:.2f}%".format(100.*i*(k+1)/totl))
                     avg_kji(kji_)
 
-            tav_val, tav_lon, tav_lat, tweight = 0., 0., 0., 0.
+            tav_val, tav_lon, tav_lat, tweight = np.zeros_like(outs[0][0]), 0., 0., 0.
             for av_val, av_lat, av_lon, weight, _, _ in outs:
                 tav_val += av_val
                 tav_lat += av_lat
                 tav_lon += av_lon
                 tweight += weight
-            dep = np.append(dep, outs[0][3])
-            f_var = np.append(f_var, tav_val/tweight, axis=-1)
+            dep = np.append(dep, outs[0][5])
+            if len(f_var.shape) == 2:
+                f_var = np.append(f_var, tav_val/tweight, axis=-1)
+            elif f_var.shape[0] != 0:
+                f_var = np.append(f_var, tav_val/tweight)
+            else:
+                f_var = tav_val/tweight
             f_lat = tav_lat/tweight
             f_lon = tav_lon/tweight
 
-        tim = outs[0][2]
+        tim = outs[0][4]
 
         #############
         # SAVE DATA #
         #############
 
-        ds = {lonname: (('y', 'x'), f_lon),
-              latname: (('y', 'x'), f_lat)}
+        ds = {lonname: ((), f_lon),
+              latname: ((), f_lat)}
 
         if timname is not None:
             ds[timname] = (('t'), tim)
         if depname is not None:
             ds[depname] = (('z'), dep)
 
-        if f_var.shape == 2:
+        if len(f_var.shape) == 2:
             ds[varname] = (('t', 'z'), f_var)
         else:
             ds[varname] = (('t'), f_var)
 
         ds = xr.Dataset(ds)
-        ds.to_netcdf(savename+'.nc')
+        ds.to_netcdf(filename+'_mean.nc')
 
 
 def average_1file(filename, maskname, varname, latname, lonname,
@@ -161,13 +167,13 @@ def average_1file(filename, maskname, varname, latname, lonname,
     av_lon = np.nansum(mask*lons)
     av_lat = np.nansum(mask*lats)
 
-    if var.shape == 4:
+    if len(var.shape) == 4:
         mask[np.isnan(var[0, 0])] = 0
         mask = mask[np.newaxis, np.newaxis, :, :]
-    elif var.shape == 3:
+    elif len(var.shape) == 3:
         mask[np.isnan(var[0])] = 0
         mask = mask[np.newaxis, :, :]
-    elif var.shape == 4:
+    elif len(var.shape) == 2:
         mask[np.isnan(var)] = 0
 
     av = np.nansum(mask*var, axis=(-1, -2))
