@@ -10,17 +10,18 @@ exec(open(params_file).read())
 ind = [np.arange(nb) for nb in Nb]
 gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 
-print("GETTING DENSITIES")
-den_main(filename_tem, filename_sal, filename_den,
-         temname, salname, depname, denname, latname, lonname,
-         timname=timname, Nproc=Nproc, ind=ind)
-
-print("COMPUTING MASK")
-mask_main(filename_ssh, filename_mas, latname, lonname,
-          Nproc=1, ind=None, Nb=Nb)
-
-print("COMPUTING AVERAGE DENSITY PROFILE")
-average_main(filename_den, filename_mas, denname, latname, lonname,
-             depname=depname, timname=timname, gridval=gridval, Nproc=Nproc, ind=ind)
+#print("GETTING DENSITIES")
+#den_main(filename_tem, filename_sal, filename_den,
+#         temname, salname, depname, denname, latname, lonname,
+#         timname=timname, Nproc=Nproc, ind=ind)
+#
+#print("COMPUTING MASK")
+#mask_main(filename_ssh, filename_mas, latname, lonname,
+#          Nproc=1, ind=None, Nb=None)
+#
+#
+#print("COMPUTING AVERAGE DENSITY PROFILE")
+#average_main(filename_den, filename_mas, denname, latname, lonname,
+#             depname=depname, timname=timname, gridval=gridval, Nproc=Nproc, ind=ind)
 
 print("FINISHED")

@@ -162,10 +162,10 @@ def average_1file(filename, maskname, varname, latname, lonname,
         indyx = np.logical_or(
             np.logical_or(lonm < gridval[0], lonm > gridval[1]),
             np.logical_or(latm < gridval[2], latm > gridval[3]))
-        mask[indyx] == 0
+        mask[indyx] = 0
 
-    av_lon = np.nansum(mask*lons)
-    av_lat = np.nansum(mask*lats)
+    av_lat = np.sum(mask*lats)
+    av_lon = np.sum(mask*lons)
 
     if len(var.shape) == 4:
         mask[np.isnan(var[0, 0])] = 0
