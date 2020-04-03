@@ -1,183 +1,193 @@
 import numpy as np
-import xarray as xr
-import dask
-from seawater.eos80 import pres, pden
-from msqg_tools.opends import load_main
-from msqg_tools.tools import int2iterable, split_iterable
+import matplotlib.pyplot as plt
+from itertools import combinations
 
 
-def den_main(filename_tem, filename_sal, savename,
-             temname, salname, depname, denname, latname, lonname,
-             pressure_lvl=False, mlat=None, Nproc=1,
-             timname=None, ind=None):
+def main_partition(savename, dep, den, ind, mlat, nl, N, L0,
+                   method="max", plotname=None, nlsep=1, p=2,
+                   depl=(0, 5000),
+                   H=5000., L=50000., U=.1, g=9.81, den0=1029,
+                   omega2=2*7.2921e-5, a=6.371e6,
+                   Ekb=0., Re=0., Re4=0., tau0=0.,
+                   DT=5e-4, tend=2000., dtout=1., CLF=.5):
     """
-    Computes the density profile of a file or a set splitted files.
-    Saves the file as the input format.
+    Gives a discretization using the given method for the potential density.
 
     Parameters
     ----------
-    filename_tem : str
-        Name of the temperature data file.
-    filename_sal : str
-        Name of the salinity data file.
-    savename : str
-        Name to the saving file.
-    temname : str
-        Name of the temperature variable.
-    temname : str
-        Name of the salinity variable.
-    latname : str
-        Name of the latitude variable.
-    lonname : str
-        Name of the longitude variable.
-    pressure_lvl : Bool, optional
-        True if the depth variable is the pressure level.
-        The default is False.
-    mlat : float, optional
-        If provided, mean latitude is used to compute pressure levels.
-        The default is None.
-    Nproc : int, optional
-        If bigger than 1 will run in parallel. The default is 1.
-    timname : str, optional
-        Name of the time variable. The default is None.
-    ind : tuple, optional
-        If the file or files to be loaded come from a partition from breakds
-        a tuple with the index must be provided (Z, Y, X). Where X, Y, Z
-        are the respective index in each dimension (floats or array like).
-        In that case the loaded data will be appended.
+    method: ["gra", "max"]
+        Name of the method to be used.
+        max: Gives a discretization using the maximum mean potential
+             density values difertence between layers.
+             The maximum is given computing a p-norm,
+             i.e., sum((den_i+1-den_i)**p).
+        gra: Gives a discretization using the maximum gradient
+             in potential density.
+    nl: int
+        Number of layers to be done.
+    depl: (float, float)
+        Estimated maximum depth for which the result is in the first layer.
+        Estimated minimum depth for which the result is in the last layer.
+        Makes the algorithm faster. Use dep = (0, H) to compute all values.
+    nlsep: int
+        The minimum number of layers to compute the subdivision. Default 1.
+        Bigger value will make the algorithm faster.
+        Minimum value must be 1.
+    p: int (Only max method)
+        The value of the p-norm to maximize.
 
     Returns
     -------
-    None.
-
-    """
-
-    # Get data from 1 file
-    if ind is None:
-        mp = [den_1file(filename_tem, filename_sal, savename,
-                        temname, salname, depname,
-                        denname, latname, lonname,
-                        pressure_lvl, mlat, timname)]
-
-    # Get data from splitted files
-    else:
-        mp = []
-
-        def den_kji(kji):
-            k, j, i = kji
-            fname_tem = filename_tem+'_'+str(k)+'_'+str(j)+'_'+str(i)
-            fname_sal = filename_sal+'_'+str(k)+'_'+str(j)+'_'+str(i)
-            fsave_den = savename+'_'+str(k)+'_'+str(j)+'_'+str(i)
-            mp.append(den_1file(fname_tem, fname_sal, fsave_den,
-                                temname, salname, depname, denname,
-                                latname, lonname, pressure_lvl,
-                                mlat, timname))
-            return 1
-
-        # Get iterables for the 3 index and call combinations
-        indk = int2iterable(ind[0])
-        indj = int2iterable(ind[1])
-        indi = int2iterable(ind[2])
-
-        kji_com = [(k, j, i) for k in indk for j in indj for i in indi]
-        totl = len(kji_com)
-
-        # Run in parallel
-        if Nproc > 1:
-            kji_com = split_iterable(kji_com, Nproc)
-            print("Processing {} files with {} cores".format(totl, Nproc))
-            totl = len(kji_com)
-            for i, kji_ in enumerate(kji_com):
-                print("\t{:.2f}%".format(100.*i/totl))
-                output = []
-                for kji in kji_:
-                    run_paral = dask.delayed(den_kji)(kji)
-                    output.append(run_paral)
-                total = dask.delayed(sum)(output)
-                total.compute()
-
-        # Run in series
-        else:
-            print("Processing {} files".format(totl))
-            for i, kji_ in enumerate(kji_com):
-                print("\t{:.2f}%".format(100.*i/totl))
-                den_kji(kji_)
-
-
-def den_1file(filename_tem, filename_sal, savename, temname,
-              salname, depname, denname, latname, lonname, pressure_lvl,
-              mlat, timname):
-    """
-    Computes the density profile from a given file.
-    Check the documentation of den_main for more information.
+    ind: ndarray (1D)
+        Array of the limits of each layer.
     """
 
     #############
     # LOAD DATA #
     #############
 
-    if filename_tem == filename_sal:
-        # Launch reading routine for 1 file
-        [tem, sal], lats, lons, tim, deps = load_main(filename_tem,
-                                                      [temname, salname],
-                                                      latname, lonname,
-                                                      depname, timname)
+    ind = dep < H
+    den, dep = den[:, ind], dep[ind]
 
+    mden = np.mean(den, axis=0)
+
+    # Defining minimum and maximum index to compute between
+    if depl[0] <= dep[0]:
+        imin = 1
     else:
-        # Launch reading routine for 2 different files
-        [tem], _, _, _, _ = load_main(filename_tem, [temname],
-                                      latname, lonname,
-                                      depname, timname)
-        [sal], lats, lons, tim, deps = load_main(filename_sal, [salname],
-                                                 latname, lonname,
-                                                 depname, timname)
+        imin = np.min(np.where(dep >= depl[0]))
 
-    pdens = np.empty_like(sal)
-    dim = lats.shape
-
-    ######################
-    # GET DENSITY VALUES #
-    ######################
-
-    # Depth variable is already a pressure level
-    if pressure_lvl:
-        for j in range(dim[0]):
-            for i in range(dim[1]):
-                for t in range(sal.shape[0]):
-                    pdens[t, :, j, i] = pden(sal[t, :, j, i],
-                                             tem[t, :, j, i],
-                                             deps)
-    # Compute the pressure levels with a mean latitude value
-    elif mlat is not None:
-        pre = pres(deps, mlat)
-        for j in range(dim[0]):
-            for i in range(dim[1]):
-                for t in range(sal.shape[0]):
-                    pdens[t, :, j, i] = pden(sal[t, :, j, i],
-                                             tem[t, :, j, i],
-                                             pre)
-        del pre
-    # Compute pressure levels with all the latitudes
+    if depl[1] >= H:
+        imax = len(dep)
     else:
-        for j in range(dim[0]):
-            for i in range(dim[1]):
-                pre = pres(deps, lats[j, i])
-                for t in range(sal.shape[0]):
-                    pdens[t, :, j, i] = pden(sal[t, :, j, i],
-                                             tem[t, :, j, i],
-                                             pre)
+        imax = np.max(np.where(dep <= depl[1]))
 
-    #############
-    # SAVE DATA #
-    #############
+    # Starts the method
+    if method == "grad":
+        ind = make_partition_grad(mden, dep, nl, nlsep, (imin, imax))
+    elif method == "max":
+        ind = make_partition_max(mden, nl, nlsep,  (imin, imax), p)
 
-    ds = {lonname: (('y', 'x'), lons),
-          latname: (('y', 'x'), lats),
-          depname: (('z'), deps),
-          denname: (('t', 'z', 'y', 'x'), pdens)}
+    # Adding first and last index to ind
+    n = len(dep)
+    ind = np.insert(ind, (0, nl-1), [0, n]).astype(int)
 
-    if timname is not None:
-        ds[timname] = (('t'), tim)
+    # Plotting
+    if plotname is not None:
+        plot_dis(plotname, den, dep, ind, H)
 
-    ds = xr.Dataset(ds)
-    ds.to_netcdf(savename+'.nc')
+    ###################
+    # SAVE PARAMETERS #
+    ###################
+
+    create_params_file(savename, dep, mden, ind, mlat, nl, N, L0,
+                       Ekb, Re, Re4, tau0, DT, tend, dtout, CLF,
+                       H, L, U, g, den0, omega2, a)
+
+
+def make_partition_grad(mden, dep, nl, nlsep, ilim):
+
+    # Computes the density gradient
+    dpden = np.diff(mden[ilim[0]:ilim[1]])\
+            / np.diff(dep[ilim[0]:ilim[1]])
+    m = len(dpden)
+    # initialize index and maximum number of loops
+    ind = []
+    while len(ind) < nl:
+        # find the index of the maximum gradient value
+        tind = np.argmax(dpden)
+        ind.append(tind)
+        # set used value and neightbours to 0
+        dpden[max(tind-nlsep, 0):min(tind+nlsep, m)] = 0
+        if np.all(dpden <= 0):
+            raise ValueError('No convergence')
+    # add minimum index and sort them
+    ind = ilim[0] + np.sort(ind)
+    return ind
+
+
+def make_partition_max(mden, nl, nlsep, ilim, p):
+
+    # Generate combinations of partitions
+    comb = combinations(np.arange(ilim[0], ilim[1]), nl-1)
+    maxval = 0
+    for c in comb:
+        if np.any(np.diff(c) <= nlsep):
+            # if in a combination layers are close go to the next one
+            continue
+        # split and compute the mean values norm
+        sp = np.split(mden, c)
+        msp = np.array([np.mean(p) for p in sp])
+        norm = np.sum(np.diff(msp)**p)
+        if norm > maxval:
+            # if norm is bigger than current value save new combination
+            maxval = norm
+            ind = c
+    return ind
+
+
+def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
+                       Ekb, Re, Re4, tau0, DT, tend, dtout, CLF,
+                       H, L, U, g, den0, omega2, a):
+
+    params = get_params(dep, den, ind, mlat,
+                        H, L, U, g, den0, omega2, a)
+    with open(savename, "w") as f:
+        f.write("#!sh\n"
+                + "# " + savename + "\n"
+                + "# input parameter files\n"
+                + "# Generated with python\n\n"
+                + "# domain size\n"
+                + "N  = {}\n".formay(N)
+                + "nl = {}\n".formay(nl)
+                + "L0 = {}\n\n".format(L0)
+                + "# physical parameters\n"
+                + "Rom   = -{}\n".format(params[2])
+                + "Ekb   = {}\n".format(Ekb)
+                + "Re    = {}\n".format(Re)
+                + "Re4   = {}\n".format(Re4)
+                + "beta  = {}\n".format(params[3])
+                + "tau0  = {}\n".format(tau0)
+                + "Fr = ["
+                + ",".join([str(params[1][i]) for i in range(nl-1)])
+                + "]\ndh = ["
+                + ",".join([str(params[0][i]) for i in range(nl)])
+                + "]\n\n"
+                + "# timestepping\n"
+                + "DT = {}.format(DT)\n"
+                + "tend  = {}\n".format(tend)
+                + "dtout = {}\n".format(dtout)
+                + "CFL   = {}".format(CLF))
+
+
+def get_params(dep, den, ind, mlat, H, L, U, g, den0, omega2, a):
+
+    ind[-1] = ind[-1] - 1
+    dh = (dep[ind[1:]] - dep[ind[:-1]])
+    h2 = .5 * (dh[1:]+dh[:-1])
+    dh = dh/H
+    sp = np.split(den, ind[1:-1])
+    msp = np.array([np.mean(p) for p in sp])
+    dp = np.diff(msp)
+    N = np.sqrt(g*dp/(h2*den0))
+    Fr = U/(N*H)
+    f = omega2*np.sin(np.deg2rad(mlat))
+    Ro = U/(f*L)
+    beta = omega2/a*np.cos(np.deg2rad(mlat))*L**2/U
+    return (dh, Fr, Ro, beta)
+
+
+def plot_dis(plotname, den, dep, ind, H):
+
+    plt.plot(den, dep, label="mean profile")
+    label2 = "discretization"
+    for i in range(len(ind)-1):
+        mdeni = np.mean(den[ind[i]:ind[i+1]])
+        plt.vlines(mdeni, dep[ind[i]], dep[ind[i+1]-1],
+                   label=label2, ls=':')
+        label2 = None
+    plt.ylabel(r"Depth ($m$)")
+    plt.xlabel(r"Potetial density ($kg\,m^{-3}$)")
+    plt.ylim(H, 0)
+    plt.savefig(plotname)
+    plt.close()

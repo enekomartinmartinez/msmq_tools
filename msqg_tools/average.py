@@ -38,7 +38,7 @@ def average_main(filename, maskname, varname, latname, lonname,
         are the respective index in each dimension (floats or array like).
         The default is None.
 
-    Returnsav
+    Returns
     -------
     None.
     """
