@@ -48,8 +48,8 @@ def average_main(filename, maskname, varname, latname, lonname,
             average_1file(filename, maskname, varname, latname,
                           lonname, depname, timname, gridval)
         f_var = f_var/weight
-        f_lat = f_lat/weight
-        f_lon = f_lon/weight
+        f_lat = f_lat/weight0
+        f_lon = f_lon/weight0
 
     else:
         def avg_kji(kji):
@@ -95,23 +95,26 @@ def average_main(filename, maskname, varname, latname, lonname,
                     print("\t{:.2f}%".format(100.*i*(k+1)/totl))
                     avg_kji(kji_)
 
-            tav_val, tav_lon, tav_lat, tweight = np.zeros_like(outs[0][0]), 0., 0., 0.
-            for av_val, av_lat, av_lon, weight, _, _ in outs:
+            tav_val, tav_lon, tav_lat, tweight, tweight0 =\
+                 np.zeros_like(outs[0][0]), 0., 0., np.zeros_like(outs[0][3]), 0.
+            for av_val, av_lat, av_lon, weight, weight0, _, _ in outs:
                 tav_val += av_val
                 tav_lat += av_lat
                 tav_lon += av_lon
+                tweight0 += weight0
                 tweight += weight
-            dep = np.append(dep, outs[0][5])
+            dep = np.append(dep, outs[0][6])
+            tweight[tweight == 0.] = 1
             if len(f_var.shape) == 2:
                 f_var = np.append(f_var, tav_val/tweight, axis=-1)
             elif f_var.shape[0] != 0:
                 f_var = np.append(f_var, tav_val/tweight)
             else:
                 f_var = tav_val/tweight
-            f_lat = tav_lat/tweight
-            f_lon = tav_lon/tweight
+            f_lat = tav_lat/tweight0
+            f_lon = tav_lon/tweight0
 
-        tim = outs[0][4]
+        tim = outs[0][5]
 
         #############
         # SAVE DATA #
@@ -166,15 +169,21 @@ def average_1file(filename, maskname, varname, latname, lonname,
 
     av_lat = np.sum(mask*lats)
     av_lon = np.sum(mask*lons)
+    weight0 = np.sum(mask)
 
-    if len(var.shape) == 4:
-        mask[np.isnan(var[0, 0])] = 0
+    var[var < 1015] = np.nan
+    sh = var.shape
+    if len(sh) == 4:
         mask = mask[np.newaxis, np.newaxis, :, :]
-    elif len(var.shape) == 3:
-        mask[np.isnan(var[0])] = 0
+        mask = np.tile(mask, (sh[0], sh[1], 1, 1))
+        mask[np.isnan(var)] = 0
+    elif len(sh) == 3:
         mask = mask[np.newaxis, :, :]
-    elif len(var.shape) == 2:
+        mask = np.tile(mask, (sh[0], 1, 1))
+        mask[np.isnan(var)] = 0
+    elif len(sh) == 2:
         mask[np.isnan(var)] = 0
 
     av = np.nansum(mask*var, axis=(-1, -2))
-    return av, av_lat, av_lon, np.sum(mask), tim, dep
+    weight = np.sum(mask, axis=(-1, -2))
+    return av, av_lat, av_lon, weight, weight0, tim, dep

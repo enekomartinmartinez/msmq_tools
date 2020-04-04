@@ -80,7 +80,26 @@ giveboundary = False
 mlat = 37.
 mlon = -57.
 L0 = 1600000
-
+H = 4500.
+L = 50000.
+U = .1
+g = 9.81
+den0 = 1029
+Ekb = 0.
+Re = 0.
+Re4 = 0
+tau0 = 0.,
+DT = 5e-4
+tend = 2000.
+dtout = 1.
+CLF = .5
+method = 'max'
+plotname = region + '_' + date + '.png'
+nlsep = 1
+p = 2
+depl = (500, 2000)
+nl = 2
+paramsname = region + '_' + date + '_params.in'
 
 ##########################################################################
 #                           SAVING PARAMETERS                            #

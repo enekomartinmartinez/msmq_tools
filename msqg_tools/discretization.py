@@ -1,15 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import combinations
+from msqg_tools.opends import load_1file
 
 
-def main_partition(savename, dep, den, ind, mlat, nl, N, L0,
+def partition_main(filename, denname, depname, latname, lonname, 
+                   savename, ind, nl, N, L0, timname=None, 
                    method="max", plotname=None, nlsep=1, p=2,
                    depl=(0, 5000),
                    H=5000., L=50000., U=.1, g=9.81, den0=1029,
-                   omega2=2*7.2921e-5, a=6.371e6,
                    Ekb=0., Re=0., Re4=0., tau0=0.,
-                   DT=5e-4, tend=2000., dtout=1., CLF=.5):
+                   DT=5e-4, tend=2000., dtout=1., CLF=.5,
+                   omega2=2*7.2921e-5, a=6.371e6):
     """
     Gives a discretization using the given method for the potential density.
 
@@ -46,10 +48,16 @@ def main_partition(savename, dep, den, ind, mlat, nl, N, L0,
     # LOAD DATA #
     #############
 
+    [den], mlat, mlon, tim, dep = load_1file(filename, [denname], 
+                                             latname, lonname,
+                                             depname, timname)
+
     ind = dep < H
     den, dep = den[:, ind], dep[ind]
 
     mden = np.mean(den, axis=0)
+    #maxdep = np.min(np.where(np.diff(mden) < 0))
+    #mden[maxdep:] = mden[maxdep] + (np.diff(mden)[maxdep-2])*np.arange(len(mden[maxdep:]))
 
     # Defining minimum and maximum index to compute between
     if depl[0] <= dep[0]:
@@ -74,7 +82,7 @@ def main_partition(savename, dep, den, ind, mlat, nl, N, L0,
 
     # Plotting
     if plotname is not None:
-        plot_dis(plotname, den, dep, ind, H)
+        plot_dis(plotname, mden, dep, ind, H)
 
     ###################
     # SAVE PARAMETERS #
@@ -138,8 +146,8 @@ def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
                 + "# input parameter files\n"
                 + "# Generated with python\n\n"
                 + "# domain size\n"
-                + "N  = {}\n".formay(N)
-                + "nl = {}\n".formay(nl)
+                + "N  = {}\n".format(N)
+                + "nl = {}\n".format(nl)
                 + "L0 = {}\n\n".format(L0)
                 + "# physical parameters\n"
                 + "Rom   = -{}\n".format(params[2])
@@ -191,3 +199,4 @@ def plot_dis(plotname, den, dep, ind, H):
     plt.ylim(H, 0)
     plt.savefig(plotname)
     plt.close()
+    print(plotname+' saved')
