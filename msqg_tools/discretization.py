@@ -4,10 +4,10 @@ from itertools import combinations
 from msqg_tools.opends import load_1file
 
 
-def partition_main(filename, denname, depname, latname, lonname, 
-                   savename, ind, nl, N, L0, timname=None, 
+def partition_main(filename, denname, depname, latname, lonname,
+                   savename, ind, nl, N, L0, timname=None,
                    method="max", plotname=None, nlsep=1, p=2,
-                   depl=(0, 5000),
+                   depl=(0, 5000), inflay=False,
                    H=5000., L=50000., U=.1, g=9.81, den0=1029,
                    Ekb=0., Re=0., Re4=0., tau0=0.,
                    DT=5e-4, tend=2000., dtout=1., CLF=.5,
@@ -48,7 +48,7 @@ def partition_main(filename, denname, depname, latname, lonname,
     # LOAD DATA #
     #############
 
-    [den], mlat, mlon, tim, dep = load_1file(filename, [denname], 
+    [den], mlat, mlon, tim, dep = load_1file(filename, [denname],
                                              latname, lonname,
                                              depname, timname)
 
@@ -56,8 +56,6 @@ def partition_main(filename, denname, depname, latname, lonname,
     den, dep = den[:, ind], dep[ind]
 
     mden = np.mean(den, axis=0)
-    #maxdep = np.min(np.where(np.diff(mden) < 0))
-    #mden[maxdep:] = mden[maxdep] + (np.diff(mden)[maxdep-2])*np.arange(len(mden[maxdep:]))
 
     # Defining minimum and maximum index to compute between
     if depl[0] <= dep[0]:
@@ -90,7 +88,7 @@ def partition_main(filename, denname, depname, latname, lonname,
 
     create_params_file(savename, dep, mden, ind, mlat, nl, N, L0,
                        Ekb, Re, Re4, tau0, DT, tend, dtout, CLF,
-                       H, L, U, g, den0, omega2, a)
+                       inflay, H, L, U, g, den0, omega2, a)
 
 
 def make_partition_grad(mden, dep, nl, nlsep, ilim):
@@ -136,9 +134,9 @@ def make_partition_max(mden, nl, nlsep, ilim, p):
 
 def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
                        Ekb, Re, Re4, tau0, DT, tend, dtout, CLF,
-                       H, L, U, g, den0, omega2, a):
+                       inflay, H, L, U, g, den0, omega2, a):
 
-    params = get_params(dep, den, ind, mlat,
+    params = get_params(dep, den, ind, mlat, inflay
                         H, L, U, g, den0, omega2, a)
     with open(savename, "w") as f:
         f.write("#!sh\n"
@@ -168,15 +166,21 @@ def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
                 + "CFL   = {}".format(CLF))
 
 
-def get_params(dep, den, ind, mlat, H, L, U, g, den0, omega2, a):
+def get_params(dep, den, ind, mlat, inflay
+               H, L, U, g, den0, omega2, a):
 
+    deltah = np.gradient(dep)
+    sh = np.split(deltah, ind[1:-1]
+    sp = np.split(den, ind[1:-1])
+    msp = np.array([np.mean(p*h) for p, H in zip(sp, sh)])
+    dp = np.diff(msp)
+    if inflay:
+        H *= 10
+        dep[-1] = H
     ind[-1] = ind[-1] - 1
     dh = (dep[ind[1:]] - dep[ind[:-1]])
     h2 = .5 * (dh[1:]+dh[:-1])
     dh = dh/H
-    sp = np.split(den, ind[1:-1])
-    msp = np.array([np.mean(p) for p in sp])
-    dp = np.diff(msp)
     N = np.sqrt(g*dp/(h2*den0))
     Fr = U/(N*H)
     f = omega2*np.sin(np.deg2rad(mlat))

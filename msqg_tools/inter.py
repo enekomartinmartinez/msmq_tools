@@ -12,7 +12,7 @@ def int_main(filename, savename, varnames,
              yb=None, xb=None,
              Lind=None, method='cubic', parallel=False):
 
-    N = N0 - Nlim
+    N = N0 - 2*Nlim
     L = L0 / N0 * N
 
     #############
