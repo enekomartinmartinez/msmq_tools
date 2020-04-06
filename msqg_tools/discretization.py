@@ -136,8 +136,9 @@ def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
                        Ekb, Re, Re4, tau0, DT, tend, dtout, CLF,
                        inflay, H, L, U, g, den0, omega2, a):
 
-    params = get_params(dep, den, ind, mlat, inflay
+    params = get_params(dep, den, ind, mlat, inflay,
                         H, L, U, g, den0, omega2, a)
+
     with open(savename, "w") as f:
         f.write("#!sh\n"
                 + "# " + savename + "\n"
@@ -166,11 +167,11 @@ def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
                 + "CFL   = {}".format(CLF))
 
 
-def get_params(dep, den, ind, mlat, inflay
+def get_params(dep, den, ind, mlat, inflay,
                H, L, U, g, den0, omega2, a):
 
     deltah = np.gradient(dep)
-    sh = np.split(deltah, ind[1:-1]
+    sh = np.split(deltah, ind[1:-1])
     sp = np.split(den, ind[1:-1])
     msp = np.array([np.mean(p*h) for p, H in zip(sp, sh)])
     dp = np.diff(msp)
