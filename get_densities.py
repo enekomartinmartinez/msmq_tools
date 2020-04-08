@@ -35,8 +35,8 @@ print("\n\n")
 print(datetime.now())
 print("\n")
 print("COMPUTING MASK")
-mt.mask_main(filename_ssh, filename_mas, latname, lonname,
-             Nproc=1, ind=None, Nb=None)
+mt.mask_main(filenames_ssh[0], filename_mas, latname, lonname,
+             Nproc=1, ind=None, Nb=Nb)
 
 
 print("\n\n")

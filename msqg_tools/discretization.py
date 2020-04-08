@@ -147,7 +147,7 @@ def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
                 + "# domain size\n"
                 + "N  = {}\n".format(N)
                 + "nl = {}\n".format(nl)
-                + "L0 = {}\n\n".format(L0)
+                + "L0 = {}\n\n".format(L0/L)
                 + "# physical parameters\n"
                 + "Rom   = -{}\n".format(params[2])
                 + "Ekb   = {}\n".format(Ekb)
@@ -160,10 +160,10 @@ def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
                 + "]\ndh = ["
                 + ",".join([str(params[0][i]) for i in range(nl)])
                 + "]\nbreak_den = ["
-                + ",".join(den[ind[1:-1]])
+                + ",".join([str(den[i]) for i in ind[1:-1]])
                 + "]\n\n"
                 + "# timestepping\n"
-                + "DT = {}.format(DT)\n"
+                + "DT = {}\n".format(DT)
                 + "tend  = {}\n".format(tend)
                 + "dtout = {}\n".format(dtout)
                 + "CFL   = {}".format(CLF))
@@ -175,7 +175,7 @@ def get_params(dep, den, ind, mlat, inflay,
     deltah = np.gradient(dep)
     sh = np.split(deltah, ind[1:-1])
     sp = np.split(den, ind[1:-1])
-    msp = np.array([np.mean(p*h) for p, H in zip(sp, sh)])
+    msp = np.array([np.average(p, weights=h) for p, h in zip(sp, sh)])
     dp = np.diff(msp)
     if inflay:
         H *= 10

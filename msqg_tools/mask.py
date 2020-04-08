@@ -91,13 +91,14 @@ def mask_1file(filename, savename, latname, lonname, ind, Nb):
     _, lats, lons, _, _ = load_1file(filename, [], latname, lonname,
                                      None, None)
     nanvalues = np.logical_and(lats == 0, lons == 0)
-    lats[nanvalues], lons[nanvalues] = np.nan, np.nan
+    latm, lonm = lats.copy(), lons.copy()
+    latm[nanvalues], lonm[nanvalues] = np.nan, np.nan
 
-    dlat = np.gradient(lats)
-    dlon = np.gradient(lons)
-    dx = np.sqrt((111000*dlon[1]*np.cos(np.deg2rad(lats)))**2
+    dlat = np.gradient(latm)
+    dlon = np.gradient(lonm)
+    dx = np.sqrt((111000*dlon[1]*np.cos(np.deg2rad(latm)))**2
                  + 111000*dlat[1]**2)
-    dy = np.sqrt((111000*dlon[0]*np.cos(np.deg2rad(lats)))**2
+    dy = np.sqrt((111000*dlon[0]*np.cos(np.deg2rad(latm)))**2
                  + 111000*dlat[0]**2)
 
     dx[np.isnan(dx)] = 0.

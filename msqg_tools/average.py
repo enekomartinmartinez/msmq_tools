@@ -171,7 +171,6 @@ def average_1file(filename, maskname, varname, latname, lonname,
     av_lon = np.sum(mask*lons)
     weight0 = np.sum(mask)
 
-    var[var < 1015] = np.nan
     sh = var.shape
     if len(sh) == 4:
         mask = mask[np.newaxis, np.newaxis, :, :]

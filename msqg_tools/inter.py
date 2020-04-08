@@ -143,13 +143,14 @@ def int_var(var_in, lat_inr, lon_inr,
             NT, NL, lat_outr, lon_outr,
             N, method, Nproc, parallel):
 
-    var_in[np.isnan(var_in)] = 0
-    var_in[np.abs(var_in)>10] = 0
 
     if NL > 0:
         var_out = np.empty((NT, NL, N, N))
+        for z in range(NL):
+            var_in[:,z][np.isnan(var_in[:, z])] = np.nanmean(var_in[:, z])
     else:
         var_out = np.empty((NT, N, N))
+        var_in[np.isnan(var_in)] = np.nanmean(var_in)
 
     if (Nproc > 1) and (NT > 1) and (parallel == 'time'):
         times = split_iterable(np.arange(NT), Nproc)
@@ -182,7 +183,7 @@ def int_var(var_in, lat_inr, lon_inr,
             
             totl = len(times)
             for i, times_ in enumerate(times):
-                print("\t\t{:.2f}%".format(100.*i/totl)
+                print("\t\t{:.2f}%".format(100.*i/totl))
                 output = []
                 for time in times_:
                     run_paral = dask.delayed(inter)(time)

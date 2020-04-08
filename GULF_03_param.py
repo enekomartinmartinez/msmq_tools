@@ -20,7 +20,9 @@ dates = ['y' + str(date[0])
          + 'd' + str(date[2]+i).zfill(2)
          for i in range(31)]
 
-Nproc = 4
+dates = [dates[0]]
+
+Nproc = 3
 Nb = (1, 10, 10)
 
 
@@ -150,12 +152,12 @@ H = 4500.
 L = 50000.
 U = .1
 g = 9.81
-den0 = 1029
+den0 = 1029.
 
 Ekb = 0.
 Re = 0.
 Re4 = 0
-tau0 = 0.,
+tau0 = 0.
 
 DT = 5e-4
 tend = 2000.
