@@ -134,6 +134,10 @@ def den_1file(filename_tem, filename_sal, savename, temname,
 
     pdens = np.empty_like(sal)
     dim = lats.shape
+    index = np.logical_and(sal == 0, tem == 0)
+    sal[index], tem[index] = np.nan, np.nan
+    index = np.logical_and(lats == 0, lons == 0)
+    lats[index], lons[index] = np.nan, np.nan
 
     ######################
     # GET DENSITY VALUES #

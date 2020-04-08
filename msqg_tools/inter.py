@@ -2,175 +2,210 @@ import dask
 import numpy as np
 import xarray as xr
 from scipy.interpolate import griddata
+from msqg_tools.opends import load_main
+from msqg_tools.tools import split_iterable
 
 
-def int_main(filename, savename, varnames,
+def int_main(filenames, varnames,
              latname, lonname, mlat, mlon,
-             L0, N0=512, Nlim=0, NL=None,
+             L0, N0=512, Nlim=0,
              depname=None, timname=None,
-             tb=None, zb=None,
-             yb=None, xb=None,
-             Lind=None, method='cubic', parallel=False):
+             method='cubic', Nproc=1, parallel='time'):
 
     N = N0 - 2*Nlim
     L = L0 / N0 * N
 
-    #############
-    # LOAD DATA #
-    #############
-    print("Loading data")
-
-    vars_in = []
-
     ##############
     # CREATE DIM #
     ##############
-    print("Creating dimensions")
 
     x = np.linspace(-L/2, L/2, N)
     X, Y = np.meshgrid(x, x)
     lat_out = mlat + Y/111000
     lon_out = mlon + X/111000/np.cos(np.deg2rad(lat_out))
 
+    lat_outr = lat_out.ravel()
+    lon_outr = lon_out.ravel()
+
+    if type(filenames) is str:
+        int_1file(filenames, varnames, latname, 
+                  lonname, depname, timname,
+                  lat_out, lat_outr, lon_out, lon_outr,
+                  N, method, Nproc, parallel)
+
+    else:
+        def int_f(filename):
+            int_1file(filename, varnames, latname, 
+                      lonname, depname, timname,
+                      lat_out, lat_outr, lon_out, lon_outr,
+                      N, method, Nproc, parallel)
+            return 1
+
+        totl = len(filenames)
+        if (Nproc > 1) and (len(filenames) > 1) and (parallel == 'file'):
+            filenames = split_iterable(filenames, Nproc)
+            print("Processing {} files with {} cores".format(totl, Nproc))
+            totl = len(filenames)
+            for i, filenames_ in enumerate(filenames):
+                print("\t{:.2f}%".format(100.*i/totl))
+                output = []
+                for filen in filenames_:
+                    run_paral = dask.delayed(int_f)(filen)
+                    output.append(run_paral)
+                total = dask.delayed(sum)(output)
+                total.compute()
+
+        else:
+            print("Processing {} files".format(totl))
+            for i, filen in enumerate(filenames):
+                print("\t{:.2f}%".format(100.*i/totl))
+                int_f(filen)
+
+
+def int_1file(filename, varnames, latname, lonname, depname, timname,
+              lat_out, lat_outr, lon_out, lon_outr, 
+              N, method, Nproc, parallel):
+
+    #############
+    # LOAD DATA #
+    #############
+    print("Loading data from " + filename + ".nc")
+
+    vars_in, lat_in, lon_in, tim, deps = load_main(filename, varnames,
+                                                   latname, lonname,
+                                                   depname, timname)
+
+
     NT = vars_in[0].shape[0]
+    NL = []
+    for var in vars_in:
+        if len(var.shape) == 4:
+            NL.append(var.shape[1])
+        else:
+            NL.append(0)
 
     vars_out = []
-    if NL > 0:
-        for i in range(len(varnames)):
-            if NL[i] > 0:
-                vars_out.append(np.empty((NT, NL, N, N)))
-            else:
-                vars_out.append(np.empty((NT, N, N)))
+    for nl in NL:
+        if nl > 0:
+            vars_out.append(np.empty((NT, nl, N, N)))
+        else:
+            vars_out.append(np.empty((NT, N, N)))
 
     lat_inr = lat_in.ravel()
     lon_inr = lon_in.ravel()
-    lat_outr = lat_out.ravel()
-    lon_outr = lon_out.ravel()
 
     #################
     # INTERPOLATION #
     #################
 
-    for v in range(len(varnames)):
-        print("Interpolating " + varnames[v])
-        int_var(vars_in[v], lat_inr, lon_inr,
-                NT, NL, lat_outr, lon_outr,
-                N, method, parallel)
+    def int_v(v):
+        print("\tInterpolating " + varnames[v])
+        vars_out[v] = int_var(vars_in[v], lat_inr, lon_inr,
+                              NT, NL[v], lat_outr, lon_outr,
+                              N, method, Nproc, parallel)
+        return 1
+
+    if (Nproc > 1) and (len(vars_out) > 1) and (parallel == 'var'):
+        output = []
+        for v in range(len(varnames)):
+            run_paral = dask.delayed(int_v)(v)
+            output.append(run_paral)
+        total = dask.delayed(sum)(output)
+        total.compute()
+    else:
+        for v in range(len(varnames)):
+            int_v(v)
+
     #############
     # SAVE DATA #
     #############
 
-    if split:
-        savename = savename[:-3]
-        Nb = int(N/Nbox)
-        for i in range(4):
-            for j in range(4):
-                savenameij = savename+'_'+str(i)+'_'+str(j)+'.nc'
-                ds = {lonname: (('y', 'x'), lon_out[i*Nb:(i+1)*Nb,
-                                                    j*Nb:(j+1)*Nb]),
-                      latname: (('y', 'x'), lat_out[i*Nb:(i+1)*Nb,
-                                                    j*Nb:(j+1)*Nb])}
-
-                if depname is not None and depname is not '':
-                    ds[depname] = (('z'), dep_in)
-
-                if timname is not None and timname is not '':
-                    ds[timname] = (('t'), tim_in)
-
-                for l in range(nvars):
-                    if NL[l] > 0:
-                        ds[varnames[l]] = (('time', 'z', 'y', 'x'),
-                                            vars_out[l][:, :,
-                                                        i*Nb:(i+1)*Nb,
-                                                        j*Nb:(j+1)*Nb])
-                    else:
-                        ds[varnames[l]] = (('time', 'y', 'x'),
-                                            vars_out[l][:,
-                                                        i*Nb:(i+1)*Nb,
-                                                        j*Nb:(j+1)*Nb])
-
-                ds = xr.Dataset(ds)
-                ds.to_netcdf(savenameij)
-
-    else:
-        ds = {lonname: (('y', 'x'), lon_out),
-              latname: (('y', 'x'), lat_out)}
-
-        if depname is not None and depname is not '':
-            ds[depname] = (('z'), dep_in)
-
-        if timname is not None and timname is not '':
-            ds[timname] = (('t'), tim_in)
-
-        for i in range(nvars):
-            if NL[i] > 0:
-                ds[varnames[i]] = (('time', 'z', 'y', 'x'), vars_out[i])
-                vars_out[i] = None
-            else:
-                ds[varnames[i]] = (('time', 'y', 'x'), vars_out[i])
-                vars_out[i] = None
-
-        ds = xr.Dataset(ds)
-        ds.to_netcdf(savename)
+    ds = {lonname: (('y', 'x'), lon_out),
+          latname: (('y', 'x'), lat_out)}
+ 
+    if depname is not None:
+        ds[depname] = (('z'), deps)
+ 
+    if timname is not None:
+        ds[timname] = (('t'), tim)
+ 
+    for nl, var, varn in zip(NL, vars_out, varnames):
+        if nl > 0:
+            ds[varn] = (('t', 'z', 'y', 'x'), var)
+        else:
+            ds[varn] = (('t', 'y', 'x'), var)
+ 
+    ds = xr.Dataset(ds)
+    ds.to_netcdf(filename + '_' + str(N) + 'x' + str(N) + '.nc') 
 
 
 def int_var(var_in, lat_inr, lon_inr,
             NT, NL, lat_outr, lon_outr,
-            N, method, parallel):
+            N, method, Nproc, parallel):
+
+    var_in[np.isnan(var_in)] = 0
+    var_in[np.abs(var_in)>10] = 0
 
     if NL > 0:
-        var_out = np.empty_like((NT, NL, N, N))
+        var_out = np.empty((NT, NL, N, N))
     else:
-        var_out = np.empty_like((NT, N, N))
+        var_out = np.empty((NT, N, N))
 
-    if parallel and NT > 1:
+    if (Nproc > 1) and (NT > 1) and (parallel == 'time'):
+        times = split_iterable(np.arange(NT), Nproc)
+        print("\tProcessing {} times with {} cores".format(NT, Nproc))
         if NL > 0:
             for l in range(NL):
-                print(str(round((l)/NL*100, 2))+'%')
+                print("\t\t{:.2f}%".format(100.*l/NL))
 
                 def inter(t):
-                    print('Computing time ' + str(t))
                     var_out[t, l] = griddata((lon_inr, lat_inr),
                                              var_in[t, l].ravel(),
                                              (lon_outr, lat_outr),
                                              method=method).reshape((N, N))
                     return 1
-                output = []
-                for i in range(NT):
-                    run_paral = dask.delayed(inter)(i)
-                    output.append(run_paral)
-                total = dask.delayed(sum)(output)
-                total.compute()
+
+                for times_ in times:
+                    output = []
+                    for time in times_:
+                        run_paral = dask.delayed(inter)(time)
+                        output.append(run_paral)
+                    total = dask.delayed(sum)(output)
+                    total.compute()
         else:
             def inter(t):
-                print('Computing time '+str(t))
                 var_out[t] = griddata((lon_inr, lat_inr),
                                       var_in[t].ravel(),
                                       (lon_outr, lat_outr),
                                       method=method).reshape((N, N))
                 return 1
-            output = []
-            for i in range(NT):
-                run_paral = dask.delayed(inter)(i)
-                output.append(run_paral)
-            total = dask.delayed(sum)(output)
-            total.compute()
+            
+            totl = len(times)
+            for i, times_ in enumerate(times):
+                print("\t\t{:.2f}%".format(100.*i/totl)
+                output = []
+                for time in times_:
+                    run_paral = dask.delayed(inter)(time)
+                    output.append(run_paral)
+                total = dask.delayed(sum)(output)
+                total.compute()
 
     else:
         if NL > 0:
             for l in range(NL):
                 for t in range(NT):
-                    print(str(round((l+1)/NL*t/NT*100, 2))+'%')
+                    print('\t\t{:.2f}%'.format((l+1)/NL*t/NT*100))
                     var_out[t, l] = griddata((lon_inr, lat_inr),
                                              var_in[t, l].ravel(),
                                              (lon_outr, lat_outr),
                                              method=method).reshape((N, N))
         else:
             for t in range(NT):
-                print(str(round(t/NT*100, 2))+'%')
+                print('\t\t{:.2f}%'.format(t/NT*100))
                 var_out[t] = griddata((lon_inr, lat_inr),
                                       var_in[t].ravel(),
                                       (lon_outr, lat_outr),
                                       method=method).reshape((N, N))
 
     return var_out
+

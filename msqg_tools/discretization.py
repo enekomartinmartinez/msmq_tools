@@ -159,6 +159,8 @@ def create_params_file(savename, dep, den, ind, mlat, nl, N, L0,
                 + ",".join([str(params[1][i]) for i in range(nl-1)])
                 + "]\ndh = ["
                 + ",".join([str(params[0][i]) for i in range(nl)])
+                + "]\nbreak_den = ["
+                + ",".join(den[ind[1:-1]])
                 + "]\n\n"
                 + "# timestepping\n"
                 + "DT = {}.format(DT)\n"

@@ -10,7 +10,7 @@ def genini_main(filename, varnames, latname, lonname, mlat, mlon,
     # LOAD DATA #
     #############
     file_in = filename + '_' + str(N0-2*Nlim) + 'x'\
-              + str(N0-2*Nlim) + '_equidis'
+              + str(N0-2*Nlim)
     Nlim = Nlim + 10
 
     vars_in, _, _, _, _ = load_1file(file_in, varnames,

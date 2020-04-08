@@ -2,19 +2,26 @@
 #                            GENERAL PARAMETERS                          #
 ##########################################################################
 # - region: (str)                                                        #
-#     Name of the region where the interpolation is done                 #
-# - parallel: (bool)                                                     #
-#     True for parallelize interpolation in time dimension               #
+#     Name of the region                                                 #
+# - date: (str)                                                          #
+#     Initial date of the dataset                                        #
 # - Nproc: (int)                                                         #
 #     Number of cores to be used                                         #
+# - Nb: (tuple of 3 int)                                                 #
+#     Number of divisions in z, y, x dimensions                          #
 ##########################################################################
 
 region = 'GULF'
-date = 'y2010m03d01'
+date = (2010,3,1)
 dateL = 'X_1h_20100220_20100316'
 dateR = '20100301-20100301'
-parallel = True
-Nproc = 3
+dates = ['y' + str(date[0])
+         + 'm' + str(date[1]).zfill(2)
+         + 'd' + str(date[2]+i).zfill(2)
+         for i in range(31)]
+
+Nproc = 4
+Nb = (1, 10, 10)
 
 
 ##########################################################################
@@ -32,6 +39,8 @@ Nproc = 3
 #     Name of the longitude to be loaded                                 #
 # - timname: (str)                                                       #
 #     Name of the time variable to be loaded                             #
+# - depname: (str)                                                       #
+#     Name of the depth variable to be loaded                            #
 ##########################################################################
 
 path2data = '/mnt/meom/workdir/martiene/DATA/E'+region+'/'
@@ -44,8 +53,8 @@ filename_den = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridD_' + dateR
 filename_mas = path2data + 'eNATL60E' + region + '-BLBT02_'\
                + 'mask'
-filename_ssh = path2data + 'eNATL60E' + region + '-BLBT02_'\
-               + date + '.1h_sossheig'
+filenames_ssh = [path2data + 'eNATL60E' + region + '-BLBT02_'
+                 + datei + '.1h_sossheig' for datei in dates]
 
 sshname = 'sossheig'
 temname = 'votemper'
@@ -64,8 +73,6 @@ depname = 'deptht'
 #     Number of gridpoints of the model                                  #
 # - Nlim: (int <<N0)                                                     #
 #     Number of gridpoints that will be left in the boundary             #
-# - giveboundary: (bool)                                                 #
-#     True for complete the boundary with linear values, 0 in the border #
 # - mlat: (float)                                                        #
 #     Mean latitude for the output grid                                  #
 # - mlon: (float)                                                        #
@@ -76,52 +83,82 @@ depname = 'deptht'
 
 N0 = 512
 Nlim = 20
-giveboundary = False
 mlat = 37.
 mlon = -57.
 L0 = 1600000
+
+##########################################################################
+#                      DISCRETIZATION PARAMETERS                         #
+##########################################################################
+# - method: (str)                                                        #
+#     Method to be used to compute discretization                        #
+# - plotname: (str)                                                      #
+#     Name of discretization plot                                        #
+# - paramsname: (str)                                                    #
+#     Name of the params output file                                     #
+# - p: (positive int)                                                    #
+#     p-norm to compute the maximum method                               #
+# - depl: ((float, float))                                               #
+#     Minimum depth of first layer, maximum depth of last layer          #
+# - nlsep: (int)                                                         #
+#     Minimum input layers separation between output two layers          #
+# - nl: (int)                                                            #
+#     Number of layers to be computed                                    #
+##########################################################################
+
+method = 'max'
+plotname = region + '_' + dates[0] + '.png'
+paramsname = region + '_' + dates[0] + '_params.in'
+p = 2
+depl = (500, 2000)
+nlsep = 1
+nl = 2
+
+
+##########################################################################
+#                           PHYSICAL PARAMETERS                          #
+##########################################################################
+# - H: (float)                                                           #
+#     Total vertical height                                              #
+# - L: (float)                                                           #
+#     Horizontal lenght scale                                            #
+# - U: (float)                                                           #
+#     Horizontal velocity scale                                          #
+# - g: (float)                                                           #
+#     Gravity                                                            #
+# - den0: (float)                                                        #
+#     Reference density                                                  #
+# - Ekb: (float)                                                         #
+#     Ekman bottom friction                                              #
+# - Re: (float)                                                          #
+#     Reynolds number                                                    #
+# - Re4: (float)                                                         #
+#     Biharmonic Reynolds number                                         #
+# - tau0: (float)                                                        #
+#     Non dimensional wind stress                                        #
+# - DT: (float)                                                          #
+#     Non dimensional time step                                          #
+# - tend: (float)                                                        #
+#     Non dimensional final time                                         #
+# - dtout: (float)                                                       #
+#     Non dimensional output time                                        #
+# - CFL: (float)                                                         #
+#     CFL constant                                                       #
+##########################################################################
+
 H = 4500.
 L = 50000.
 U = .1
 g = 9.81
 den0 = 1029
+
 Ekb = 0.
 Re = 0.
 Re4 = 0
 tau0 = 0.,
+
 DT = 5e-4
 tend = 2000.
 dtout = 1.
 CLF = .5
-method = 'max'
-plotname = region + '_' + date + '.png'
-nlsep = 1
-p = 2
-depl = (500, 2000)
-nl = 2
-paramsname = region + '_' + date + '_params.in'
-
-##########################################################################
-#                           SAVING PARAMETERS                            #
-##########################################################################
-# - path2save: (str)                                                     #
-#     Path where the data will be saved                                  #
-# - savename: (str)                                                      #
-#     Saving name                                                        #
-##########################################################################
-
-path2save = path2data
-
-
-##########################################################################
-#                            SPLITING PARAMETERS                         #
-##########################################################################
-# - split: (bool)                                                        #
-#     True for split the data in sub-boxes                               #
-# - Nb: (tuple of 3 int)                                                 #
-#     Number of divisions in z, y, x dimensions                          #
-##########################################################################
-
-split = False
-Nb = (1, 10, 10)
 
