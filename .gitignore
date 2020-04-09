@@ -1,0 +1,5 @@
+msqg_tools/__pycache__/
+log*.out
+.nfs*
+*.png
+*.in
