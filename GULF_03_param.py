@@ -46,11 +46,16 @@ Nb = (1, 10, 10)
 ##########################################################################
 
 path2data = '/mnt/meom/workdir/martiene/DATA/E'+region+'/'
+path2data_occi = '/scratch/cnt0024/hmg2840/emartin/DATA/E'+region+'/'
 
 filename_tem = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridT_' + dateR
 filename_sal = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridS_' + dateR
+filename_tem_occi = path2data_occi + 'eNATL60E' + region\
+                    + '-BLBT02' + dateL + '_gridT_' + dateR
+filename_sal_occi = path2data_occi + 'eNATL60E' + region\
+                    + '-BLBT02' + dateL + '_gridS_' + dateR
 filename_den = path2data + 'eNATL60E' + region + '-BLBT02'\
                + dateL + '_gridD_' + dateR
 filename_mas = path2data + 'eNATL60E' + region + '-BLBT02_'\
