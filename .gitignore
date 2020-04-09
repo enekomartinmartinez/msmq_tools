@@ -1,5 +1,6 @@
 msqg_tools/__pycache__/
 log*.out
+log*.err
 .nfs*
 *.png
 *.in

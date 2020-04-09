@@ -11,8 +11,8 @@
 #     Number of divisions in z, y, x dimensions                          #
 ##########################################################################
 
-region = 'OSMO'
-date = (2013, 3, 1)
+region = 'GULF'
+date = (2012, 10, 1)
 dateL = 'X_1h_20100220_20100316'
 dateR = '20100301-20100301'
 dates = ['y' + str(date[0])
@@ -88,9 +88,9 @@ depname = 'deptht'
 
 N0 = 512
 Nlim = 30
-mlat = 50.5
-mlon = -20.
-L0 = 1300000
+mlat = 36.5
+mlon = -53.
+L0 = 1800000
 
 ##########################################################################
 #                      DISCRETIZATION PARAMETERS                         #

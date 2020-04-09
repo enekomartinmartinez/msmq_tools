@@ -12,15 +12,13 @@
 ##########################################################################
 
 region = 'GULF'
-date = (2010,3,1)
+date = (2013, 3, 1)
 dateL = 'X_1h_20100220_20100316'
 dateR = '20100301-20100301'
 dates = ['y' + str(date[0])
          + 'm' + str(date[1]).zfill(2)
          + 'd' + str(date[2]+i).zfill(2)
          for i in range(31)]
-
-dates = [dates[0]]
 
 Nproc = 3
 Nb = (1, 10, 10)
@@ -48,19 +46,19 @@ Nb = (1, 10, 10)
 path2data = '/mnt/meom/workdir/martiene/DATA/E'+region+'/'
 path2data_occi = '/scratch/cnt0024/hmg2840/emartin/DATA/E'+region+'/'
 
-filename_tem = path2data + 'eNATL60E' + region + '-BLBT02'\
+filename_tem = path2data + 'NATL60E' + region + '-CJM165'\
                + dateL + '_gridT_' + dateR
-filename_sal = path2data + 'eNATL60E' + region + '-BLBT02'\
+filename_sal = path2data + 'NATL60E' + region + '-CJM165'\
                + dateL + '_gridS_' + dateR
-filename_tem_occi = path2data_occi + 'eNATL60E' + region\
-                    + '-BLBT02' + dateL + '_gridT_' + dateR
-filename_sal_occi = path2data_occi + 'eNATL60E' + region\
-                    + '-BLBT02' + dateL + '_gridS_' + dateR
-filename_den = path2data + 'eNATL60E' + region + '-BLBT02'\
+filename_tem_occi = path2data_occi + 'NATL60E' + region\
+                    + '-CJM165' + dateL + '_gridT_' + dateR
+filename_sal_occi = path2data_occi + 'NATL60E' + region\
+                    + '-CJM165' + dateL + '_gridS_' + dateR
+filename_den = path2data + 'NATL60E' + region + '-CJM165'\
                + dateL + '_gridD_' + dateR
-filename_mas = path2data + 'eNATL60E' + region + '-BLBT02_'\
+filename_mas = path2data + 'NATL60E' + region + '-CJM165_'\
                + 'mask'
-filenames_ssh = [path2data + 'eNATL60E' + region + '-BLBT02_'
+filenames_ssh = [path2data + 'NATL60E' + region + '-CJM165_'
                  + datei + '.1h_sossheig' for datei in dates]
 
 sshname = 'sossheig'
@@ -89,10 +87,10 @@ depname = 'deptht'
 ##########################################################################
 
 N0 = 512
-Nlim = 20
-mlat = 37.
-mlon = -57.
-L0 = 1600000
+Nlim = 30
+mlat = 36.5
+mlon = -53.
+L0 = 1800000
 
 ##########################################################################
 #                      DISCRETIZATION PARAMETERS                         #
