@@ -13,13 +13,15 @@ def int_main(filenames, varnames,
              method='cubic', Nproc=1, parallel='time'):
 
     N = N0 - 2*Nlim
-    L = L0 / N0 * N
+    DX = L0 / N0
+    L = DX * N
+    L2 = (L-DX)/2
 
     ##############
     # CREATE DIM #
     ##############
 
-    x = np.linspace(-L/2, L/2, N)
+    x = np.linspace(-L2, L2, N)
     X, Y = np.meshgrid(x, x)
     lat_out = mlat + Y/111000
     lon_out = mlon + X/111000/np.cos(np.deg2rad(lat_out))
@@ -28,14 +30,14 @@ def int_main(filenames, varnames,
     lon_outr = lon_out.ravel()
 
     if type(filenames) is str:
-        int_1file(filenames, varnames, latname, 
+        int_1file(filenames, varnames, latname,
                   lonname, depname, timname,
                   lat_out, lat_outr, lon_out, lon_outr,
                   N, method, Nproc, parallel)
 
     else:
         def int_f(filename):
-            int_1file(filename, varnames, latname, 
+            int_1file(filename, varnames, latname,
                       lonname, depname, timname,
                       lat_out, lat_outr, lon_out, lon_outr,
                       N, method, Nproc, parallel)
@@ -63,7 +65,7 @@ def int_main(filenames, varnames,
 
 
 def int_1file(filename, varnames, latname, lonname, depname, timname,
-              lat_out, lat_outr, lon_out, lon_outr, 
+              lat_out, lat_outr, lon_out, lon_outr,
               N, method, Nproc, parallel):
 
     #############
@@ -74,7 +76,6 @@ def int_1file(filename, varnames, latname, lonname, depname, timname,
     vars_in, lat_in, lon_in, tim, deps = load_main(filename, varnames,
                                                    latname, lonname,
                                                    depname, timname)
-
 
     NT = vars_in[0].shape[0]
     NL = []
@@ -122,32 +123,31 @@ def int_1file(filename, varnames, latname, lonname, depname, timname,
 
     ds = {lonname: (('y', 'x'), lon_out),
           latname: (('y', 'x'), lat_out)}
- 
+
     if depname is not None:
         ds[depname] = (('z'), deps)
- 
+
     if timname is not None:
         ds[timname] = (('t'), tim)
- 
+
     for nl, var, varn in zip(NL, vars_out, varnames):
         if nl > 0:
             ds[varn] = (('t', 'z', 'y', 'x'), var)
         else:
             ds[varn] = (('t', 'y', 'x'), var)
- 
+
     ds = xr.Dataset(ds)
-    ds.to_netcdf(filename + '_' + str(N) + 'x' + str(N) + '.nc') 
+    ds.to_netcdf(filename + '_' + str(N) + 'x' + str(N) + '.nc')
 
 
 def int_var(var_in, lat_inr, lon_inr,
             NT, NL, lat_outr, lon_outr,
             N, method, Nproc, parallel):
 
-
     if NL > 0:
         var_out = np.empty((NT, NL, N, N))
         for z in range(NL):
-            var_in[:,z][np.isnan(var_in[:, z])] = np.nanmean(var_in[:, z])
+            var_in[:, z][np.isnan(var_in[:, z])] = np.nanmean(var_in[:, z])
     else:
         var_out = np.empty((NT, N, N))
         var_in[np.isnan(var_in)] = np.nanmean(var_in)
@@ -180,7 +180,7 @@ def int_var(var_in, lat_inr, lon_inr,
                                       (lon_outr, lat_outr),
                                       method=method).reshape((N, N))
                 return 1
-            
+
             totl = len(times)
             for i, times_ in enumerate(times):
                 print("\t\t{:.2f}%".format(100.*i/totl))
@@ -209,4 +209,3 @@ def int_var(var_in, lat_inr, lon_inr,
                                       method=method).reshape((N, N))
 
     return var_out
-

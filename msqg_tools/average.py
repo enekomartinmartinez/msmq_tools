@@ -44,7 +44,7 @@ def average_main(filename, maskname, varname, latname, lonname,
     """
 
     if ind is None:
-        f_var, f_lat, f_lon, weight, tim, dep =\
+        f_var, f_lat, f_lon, weight, weight0, tim, dep =\
             average_1file(filename, maskname, varname, latname,
                           lonname, depname, timname, gridval)
         f_var = f_var/weight
@@ -95,8 +95,10 @@ def average_main(filename, maskname, varname, latname, lonname,
                     print("\t{:.2f}%".format(100.*i*(k+1)/totl))
                     avg_kji(kji_)
 
-            tav_val, tav_lon, tav_lat, tweight, tweight0 =\
-                 np.zeros_like(outs[0][0]), 0., 0., np.zeros_like(outs[0][3]), 0.
+            tav_val = np.zeros_like(outs[0][0])
+            tav_lon, tav_lat = 0., 0.
+            tweight, tweight0 = np.zeros_like(outs[0][3]), 0.
+
             for av_val, av_lat, av_lon, weight, weight0, _, _ in outs:
                 tav_val += av_val
                 tav_lat += av_lat
