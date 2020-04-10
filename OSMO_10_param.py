@@ -161,4 +161,3 @@ DT = 5e-4
 tend = 2000.
 dtout = 1.
 CLF = .5
-

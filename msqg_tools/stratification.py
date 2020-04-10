@@ -1,22 +1,25 @@
 import dask
 import numpy as np
 import xarray as xr
-from msqg_tools.opends import load_1file
+from scipy.interpolate import interp1d
+from msqg_tools.opends import load_main
 from msqg_tools.tools import int2iterable, split_iterable
 
 
-def stra_main(filename, maskname, varname, latname, lonname,
-                 depname=None, timname=None, gridval=None,
-                 Nproc=1, ind=None):
+def stra_main(file_den, file_str, bden, denname, latname, lonname,
+              depname, strname, timname=None, Nproc=1, ind=None, H=5000):
 
     if ind is None:
-        stra_1file(filename,
+        stra_1file(file_den, file_str, bden, denname, latname, lonname,
+                   depname, strname, timname, H)
 
     else:
         def str_kji(kji):
             k, j, i = kji
-            fname = filename + '_' + str(k) + '_' + str(j) + '_' + str(i)
-            stra_1file(fname,
+            fden = file_den + '_' + str(k) + '_' + str(j) + '_' + str(i)
+            fstr = file_str + '_' + str(k) + '_' + str(j) + '_' + str(i)
+            stra_1file(fden, fstr, bden, denname, latname, lonname,
+                       depname, strname, timname, H)
             return 1
 
         # Get iterables for the 3 index and call combinations
@@ -50,15 +53,49 @@ def stra_main(filename, maskname, varname, latname, lonname,
                     print("\t{:.2f}%".format(100.*i*(k+1)/totl))
                     str_kji(kji_)
 
+        [strval], lats, lons, tim, _ = load_main(file_str, [strname],
+                                                 latname, lonname,
+                                                 None, timname, ind)
 
-def stra_1file(filename,
+        ds = {lonname: (('y', 'x'), lons),
+              latname: (('y', 'x'), lats),
+              strname: (('t', 'z', 'y', 'x'), strval)}
+
+        if timname is not None:
+            ds[timname] = (('t'), tim)
+
+        ds = xr.Dataset(ds)
+        ds.to_netcdf(file_str+'.nc')
+
+
+def stra_1file(file_den, file_str, bden, denname, latname, lonname,
+               depname, strname, timname, H):
 
     #############
     # LOAD DATA #
     #############
 
-    [den], lats, lons, tim, dep = load_1file(filename, [denname],
-                                             latname, lonname,
-                                             depname, timname)
+    [den], lats, lons, tim, dep = load_main(file_den, [denname],
+                                            latname, lonname,
+                                            depname, timname)
+    dind = dep < H
+    den, dep = den[:, dind], dep[dind]
 
+    dim = den.shape
 
+    strval = np.empty((dim[0], len(bden), dim[2], dim[3]))
+    for t in range(dim[0]):
+        for j in range(dim[2]):
+            for i in range(dim[3]):
+                strval[t, :, j, i] =\
+                    interp1d(den[t, :, j, i], dep, kind='cubic')(bden)
+
+    ds = {lonname: (('y', 'x'), lons),
+          latname: (('y', 'x'), lats),
+          strname: (('t', 'z', 'y', 'x'), strval)}
+
+    if timname is not None:
+        ds[timname] = (('t'), tim)
+
+    ds = xr.Dataset(ds)
+    ds.to_netcdf(file_str+'.nc')
