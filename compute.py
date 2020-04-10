@@ -2,8 +2,10 @@ import sys
 import numpy as np
 from datetime import datetime
 import matplotlib as mpl
-mpl.use('Agg')
 import msqg_tools as mt
+
+mpl.use('Agg')
+
 
 params_file = str(sys.argv[1])
 exec(open(params_file).read())
@@ -46,7 +48,7 @@ mt.int_main(filenames_ssh, [sshname],
 #print("\n")
 #print("COMPUTING AVERAGE DENSITY PROFILE")
 #mt.average_main(filename_den, filename_mas, denname, latname, lonname,
-#                depname=depname, timname=timname, gridval=gridval, 
+#                depname=depname, timname=timname, gridval=gridval,
 #                Nproc=Nproc, ind=ind)
 #
 #
@@ -54,7 +56,7 @@ mt.int_main(filenames_ssh, [sshname],
 #print(datetime.now())
 #print("\n")
 #print("COMPUTING DISCRETIZATION")
-#mt.partition_main(filename_den+'_mean', denname, 
+#mt.partition_main(filename_den+'_mean', denname,
 #                  depname, latname, lonname,
 #                  paramsname, ind, nl, N0, L0, timname,
 #                  method, plotname, nlsep, p,
