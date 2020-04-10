@@ -86,37 +86,54 @@ def load_split(filename, varnames, latname, lonname,
     nvars = len(varnames)
 
     # Loop appending the values
-    vars_k = [np.array([]) for v in range(nvars)]
-    dep_k = np.array([])
+    vars_k = [None for v in range(nvars)]
+    dep_k = None
     for k in indk:
-        vars_j = [np.array([]) for var in varnames]
-        lat_j, lon_j = np.array([]), np.array([])
+        vars_j = [None for var in varnames]
+        lat_j, lon_j = None, None
         for j in indj:
-            vars_i = [np.array([]) for var in varnames]
-            lat_i, lon_i = np.array([]), np.array([])
+            vars_i = [None for var in varnames]
+            lat_i, lon_i = None, None
             for i in indi:
                 filenamekji = filename+'_'+str(k)+'_'+str(j)+'_'+str(i)
                 with xr.open_dataset(filenamekji+'.nc') as data:
                     for v in range(nvars):
-                        vars_i[v] = np.append(vars_i[v],
-                                              data[varnames[v]].values,
-                                              axis=-1)
-                    lat_i = np.append(lat_i, data[latname].values, axis=-1)
-                    lon_i = np.append(lon_i, data[lonname].values, axis=-1)
+                        if vars_i[v] is None:
+                            vars_i[v] = data[varnames[v]].values
+                        else:
+                            vars_i[v] = np.append(vars_i[v],
+                                                  data[varnames[v]].values,
+                                                  axis=-1)
+                    if lat_i is None:
+                        lat_i = data[latname].values
+                        lon_i = data[lonname].values
+                    else:
+                        lat_i = np.append(lat_i, data[latname].values, axis=-1)
+                        lon_i = np.append(lon_i, data[lonname].values, axis=-1)
                     if depname is not None:
                         dep_in = data[depname].values
                     if timname is not None:
                         tim_in = data[timname].values
             for v in range(nvars):
-                vars_j[v] = np.append(vars_j, vars_i, axis=-2)
-            lat_j = np.append(lat_j, lat_i, axis=-2)
-            lon_j = np.append(lon_j, lon_i, axis=-2)
-        for v in range(nvars):
-            if len(vars_j.shape) == 4:
-                vars_k[v] = np.append(vars_k, vars_j, axis=-3)
+                if vars_j[v] is None:
+                    vars_j[v] = vars_i[v]
+                else:
+                    vars_j[v] = np.append(vars_j[v], vars_i[v], axis=-2)
+            if lat_j is None:
+                lat_j = lat_i
+                lon_j = lon_i
             else:
-                vars_k[v] = vars_j
+                lat_j = np.append(lat_j, lat_i, axis=-2)
+                lon_j = np.append(lon_j, lon_i, axis=-2)
+        for v in range(nvars):
+            if len(vars_j[v].shape) == 3 or vars_k[v] is None:
+                vars_k[v] = vars_j[v]
+            else:
+                vars_k[v] = np.append(vars_k[v], vars_j[v], axis=-3)
         if depname is not None:
-            dep_k = np.append(dep_k, dep_in)
+            if dep_k is None:
+                dep_k = dep_in
+            else:
+                dep_k = np.append(dep_k, dep_in)
 
     return vars_k, lat_j, lon_j, tim_in, dep_k

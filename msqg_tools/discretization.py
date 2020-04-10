@@ -94,7 +94,7 @@ def partition_main(filename, denname, depname, latname, lonname,
     # RETURN DISCRETIZATION DENSITIES #
     ###################################
 
-    return den[ind[1:-1]]
+    return (dep[ind[1:-1]], mden[ind[1:-1]])
 
 
 def make_partition_grad(mden, dep, nl, nlsep, ilim):

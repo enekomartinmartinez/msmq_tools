@@ -51,6 +51,8 @@ filename_sal = path2data + 'NATL60E' + region + '-CJM165_'\
                + date0 + '.1d_vosaline'
 filename_den = path2data + 'NATL60E' + region + '-CJM165_'\
                + date0 + '.1d_pdens'
+filename_str = path2data + 'NATL60E' + region + '-CJM165_'\
+               + date0 + '.1d_strheig'
 filename_mas = path2data + 'NATL60E' + region + '-CJM165_'\
                + 'mask'
 filenames_ssh = [path2data + 'NATL60E' + region + '-CJM165_'
@@ -64,6 +66,7 @@ latname = 'nav_lat'
 lonname = 'nav_lon'
 timname = 'time_counter'
 depname = 'deptht'
+strname = 'strheig'
 
 
 ##########################################################################

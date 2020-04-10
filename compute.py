@@ -70,8 +70,9 @@ print("\n\n")
 print(datetime.now())
 print("\n")
 print("COMPUTING STRATIFICATION")
-# TO DO
-
+mt.stra_main(filename_den, filename_str, bden,
+             denname, latname, lonname, depname,
+             strname, timname, Nproc, ind, H)
 
 #print("\n\n")
 #print(datetime.now())

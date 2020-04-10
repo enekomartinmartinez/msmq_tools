@@ -6,11 +6,11 @@ from msqg_tools.opends import load_main
 from msqg_tools.tools import int2iterable, split_iterable
 
 
-def stra_main(file_den, file_str, bden, denname, latname, lonname,
+def stra_main(file_den, file_str, bpnt, denname, latname, lonname,
               depname, strname, timname=None, Nproc=1, ind=None, H=5000):
 
     if ind is None:
-        stra_1file(file_den, file_str, bden, denname, latname, lonname,
+        stra_1file(file_den, file_str, bpnt, denname, latname, lonname,
                    depname, strname, timname, H)
 
     else:
@@ -18,7 +18,7 @@ def stra_main(file_den, file_str, bden, denname, latname, lonname,
             k, j, i = kji
             fden = file_den + '_' + str(k) + '_' + str(j) + '_' + str(i)
             fstr = file_str + '_' + str(k) + '_' + str(j) + '_' + str(i)
-            stra_1file(fden, fstr, bden, denname, latname, lonname,
+            stra_1file(fden, fstr, bpnt, denname, latname, lonname,
                        depname, strname, timname, H)
             return 1
 
@@ -68,7 +68,7 @@ def stra_main(file_den, file_str, bden, denname, latname, lonname,
         ds.to_netcdf(file_str+'.nc')
 
 
-def stra_1file(file_den, file_str, bden, denname, latname, lonname,
+def stra_1file(file_den, file_str, bpnt, denname, latname, lonname,
                depname, strname, timname, H):
 
     #############
@@ -78,17 +78,31 @@ def stra_1file(file_den, file_str, bden, denname, latname, lonname,
     [den], lats, lons, tim, dep = load_main(file_den, [denname],
                                             latname, lonname,
                                             depname, timname)
-    dind = dep < H
-    den, dep = den[:, dind], dep[dind]
+    #dind = np.logical_and(dep > 500, dep < 2000)
+    #den, dep = den[:, dind], dep[dind]
 
     dim = den.shape
 
-    strval = np.empty((dim[0], len(bden), dim[2], dim[3]))
-    for t in range(dim[0]):
-        for j in range(dim[2]):
-            for i in range(dim[3]):
-                strval[t, :, j, i] =\
-                    interp1d(den[t, :, j, i], dep, kind='cubic')(bden)
+    strval = np.empty((dim[0], len(bpnt[0]), dim[2], dim[3]))
+
+    for k, (h, p) in enumerate(zip(bpnt[0], bpnt[1])):
+        dind = np.logical_and(dep > h-300, dep < h+300)
+        denk, depk = den[:, dind], dep[dind]
+        
+        for t in range(dim[0]):
+            for j in range(dim[2]):
+                for i in range(dim[3]):
+                    nonanval = ~np.isnan(denk[t, :, j, i])
+                    denkji = denk[t, nonanval, j, i]
+                    depkji = depk[nonanval]
+                    if len(depkji) == 0\
+                       or p < np.min(denkji)\
+                       or p > np.max(denkji):
+                         strval[t, k, j, i] = np.nan
+                         print("nan value encountered")
+                    else:
+                        strval[t, k, j, i] =\
+                            interp1d(denkji, depkji, kind='cubic')(p)
 
     ds = {lonname: (('y', 'x'), lons),
           latname: (('y', 'x'), lats),
