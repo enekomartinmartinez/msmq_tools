@@ -52,26 +52,26 @@ gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 #                Nproc=Nproc, ind=ind)
 
 
-#print("\n\n")
-#print(datetime.now())
-#print("\n")
-#print("COMPUTING DISCRETIZATION")
-#mt.partition_main(filename_den+'_mean', denname,
-#                  depname, latname, lonname,
-#                  paramsname, ind, nl, N0, L0, timname,
-#                  method, plotname, nlsep, p,
-#                  depl, False,
-#                  H, L, U, g, den0,
-#                  Ekb, Re, Re4, tau0,
-#                  DT, tend, dtout, CLF)
-#
-#
-#print("\n\n")
-#print(datetime.now())
-#print("\n")
-#print("COMPUTING STRATIFICATION")
-## TO DO
-#
+print("\n\n")
+print(datetime.now())
+print("\n")
+print("COMPUTING DISCRETIZATION")
+bden = mt.partition_main(filename_den+'_mean', denname,
+                         depname, latname, lonname,
+                         paramsname, ind, nl, N0, L0, timname,
+                         method, plotname, nlsep, p,
+                         depl, False,
+                         H, L, U, g, den0,
+                         Ekb, Re, Re4, tau0,
+                         DT, tend, dtout, CLF)
+
+
+print("\n\n")
+print(datetime.now())
+print("\n")
+print("COMPUTING STRATIFICATION")
+# TO DO
+
 
 #print("\n\n")
 #print(datetime.now())
