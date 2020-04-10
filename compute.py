@@ -70,13 +70,13 @@ mt.int_main(filenames_ssh, [sshname],
 #print("COMPUTING STRATIFICATION")
 ## TO DO
 #
-#
-#print("\n\n")
-#print(datetime.now())
-#print("\n")
-#print("COMPUTING INI FILE")
-#mt.genini_main(filenames_ssh[0], [sshname], latname, lonname, mlat, mlon,
-#               L0, N0, Nlim)
+
+print("\n\n")
+print(datetime.now())
+print("\n")
+print("COMPUTING INI FILE")
+mt.genini_main(filenames_ssh[0], [sshname], latname, lonname, mlat, mlon,
+               L0, N0, Nlim)
 
 
 print("\n\n")
