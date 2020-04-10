@@ -11,15 +11,15 @@ exec(open(params_file).read())
 ind = [np.arange(nb) for nb in Nb]
 gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 
-print("\n\n")
-print(datetime.now())
-print("\n")
-print("INTERPOLATING SSH DATA")
-mt.int_main(filenames_ssh, [sshname],
-            latname, lonname, mlat, mlon,
-            L0, N0, Nlim,
-            None, timname,
-            'cubic', Nproc, parallel='time')
+#print("\n\n")
+#print(datetime.now())
+#print("\n")
+#print("INTERPOLATING SSH DATA")
+#mt.int_main(filenames_ssh, [sshname],
+#            latname, lonname, mlat, mlon,
+#            L0, N0, Nlim,
+#            None, timname,
+#            'cubic', Nproc, parallel='time')
 
 # SPLITTING S AND T DATA
 # Computed in other machine
@@ -48,8 +48,8 @@ mt.int_main(filenames_ssh, [sshname],
 #mt.average_main(filename_den, filename_mas, denname, latname, lonname,
 #                depname=depname, timname=timname, gridval=gridval, 
 #                Nproc=Nproc, ind=ind)
-#
-#
+
+
 #print("\n\n")
 #print(datetime.now())
 #print("\n")
@@ -71,12 +71,12 @@ mt.int_main(filenames_ssh, [sshname],
 ## TO DO
 #
 
-print("\n\n")
-print(datetime.now())
-print("\n")
-print("COMPUTING INI FILE")
-mt.genini_main(filenames_ssh[0], [sshname], latname, lonname, mlat, mlon,
-               L0, N0, Nlim)
+#print("\n\n")
+#print(datetime.now())
+#print("\n")
+#print("COMPUTING INI FILE")
+#mt.genini_main(filenames_ssh[0], [sshname], latname, lonname, mlat, mlon,
+#               L0, N0, Nlim)
 
 
 print("\n\n")

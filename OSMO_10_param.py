@@ -13,14 +13,14 @@
 
 region = 'OSMO'
 date = (2012, 10, 1)
-dateL = 'X_1h_20100220_20100316'
-dateR = '20100301-20100301'
 dates = ['y' + str(date[0])
          + 'm' + str(date[1]).zfill(2)
          + 'd' + str(date[2]+i).zfill(2)
          for i in range(31)]
 
-Nproc = 3
+date0 = dates[0]
+
+Nproc = 2
 Nb = (1, 10, 10)
 
 
@@ -44,18 +44,13 @@ Nb = (1, 10, 10)
 ##########################################################################
 
 path2data = '/mnt/meom/workdir/martiene/DATA/E'+region+'/'
-path2data_occi = '/scratch/cnt0024/hmg2840/emartin/DATA/E'+region+'/'
 
-filename_tem = path2data + 'NATL60E' + region + '-CJM165'\
-               + dateL + '_gridT_' + dateR
-filename_sal = path2data + 'NATL60E' + region + '-CJM165'\
-               + dateL + '_gridS_' + dateR
-filename_tem_occi = path2data_occi + 'NATL60E' + region\
-                    + '-CJM165' + dateL + '_gridT_' + dateR
-filename_sal_occi = path2data_occi + 'NATL60E' + region\
-                    + '-CJM165' + dateL + '_gridS_' + dateR
-filename_den = path2data + 'NATL60E' + region + '-CJM165'\
-               + dateL + '_gridD_' + dateR
+filename_tem = path2data + 'NATL60E' + region + '-CJM165_'\
+               + date0 + '.1d_votemper'
+filename_sal = path2data + 'NATL60E' + region + '-CJM165_'\
+               + date0 + '.1d_vosaline'
+filename_den = path2data + 'NATL60E' + region + '-CJM165_'\
+               + date0 + '.1d_pdens'
 filename_mas = path2data + 'NATL60E' + region + '-CJM165_'\
                + 'mask'
 filenames_ssh = [path2data + 'NATL60E' + region + '-CJM165_'
