@@ -17,7 +17,7 @@ def partition_main(filename, denname, depname, latname, lonname,
 
     Parameters
     ----------
-    method: ["gra", "max"]
+    method: ["grad", "max"]
         Name of the method to be used.
         max: Gives a discretization using the maximum mean potential
              density values difertence between layers.
@@ -75,8 +75,7 @@ def partition_main(filename, denname, depname, latname, lonname,
         ind = make_partition_max(mden, nl, nlsep,  (imin, imax), p)
 
     # Adding first and last index to ind
-    n = len(dep)
-    ind = np.insert(ind, (0, nl-1), [0, n]).astype(int)
+    ind = np.insert(ind, (0, nl-1), [0, len(dep)]).astype(int)
 
     # Plotting
     if plotname is not None:
@@ -105,7 +104,7 @@ def make_partition_grad(mden, dep, nl, nlsep, ilim):
     m = len(dpden)
     # initialize index and maximum number of loops
     ind = []
-    while len(ind) < nl:
+    while len(ind) < (nl-1):
         # find the index of the maximum gradient value
         tind = np.argmax(dpden)
         ind.append(tind)
@@ -128,8 +127,9 @@ def make_partition_max(mden, nl, nlsep, ilim, p):
             # if in a combination layers are close go to the next one
             continue
         # split and compute the mean values norm
-        sp = np.split(mden, c)
-        msp = np.array([np.mean(p) for p in sp])
+        sh = np.split(deltah, c)
+        sp = np.split(den, c)
+        msp = np.array([np.average(p, weights=h) for p, h in zip(sp, sh)])
         norm = np.sum(np.diff(msp)**p)
         if norm > maxval:
             # if norm is bigger than current value save new combination

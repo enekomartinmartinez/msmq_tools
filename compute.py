@@ -10,18 +10,18 @@ mpl.use('Agg')
 params_file = str(sys.argv[1])
 exec(open(params_file).read())
 
-ind = [np.arange(nb) for nb in Nb]
-gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
+#ind = [np.arange(nb) for nb in Nb]
+#gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 
-#print("\n\n")
-#print(datetime.now())
-#print("\n")
-#print("INTERPOLATING SSH DATA")
-#mt.int_main(filenames_ssh, [sshname],
-#            latname, lonname, mlat, mlon,
-#            L0, N0, Nlim,
-#            None, timname,
-#            'cubic', Nproc, parallel='time')
+print("\n\n")
+print(datetime.now())
+print("\n")
+print("INTERPOLATING SSH DATA")
+mt.int_main(filenames_ssh, [sshname],
+            latname, lonname, mlat, mlon,
+            L0, N0, Nlim,
+            None, timname,
+            'cubic', Nproc, parallel='time')
 
 # SPLITTING S AND T DATA
 # Computed in other machine
@@ -50,30 +50,30 @@ gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 #mt.average_main(filename_den, filename_mas, denname, latname, lonname,
 #                depname=depname, timname=timname, gridval=gridval,
 #                Nproc=Nproc, ind=ind)
-
-
-print("\n\n")
-print(datetime.now())
-print("\n")
-print("COMPUTING DISCRETIZATION")
-bden = mt.partition_main(filename_den+'_mean', denname,
-                         depname, latname, lonname,
-                         paramsname, ind, nl, N0, L0, timname,
-                         method, plotname, nlsep, p,
-                         depl, False,
-                         H, L, U, g, den0,
-                         Ekb, Re, Re4, tau0,
-                         DT, tend, dtout, CLF)
-
-
-print("\n\n")
-print(datetime.now())
-print("\n")
-print("COMPUTING STRATIFICATION")
-mt.stra_main(filename_den, filename_str, bden,
-             denname, latname, lonname, depname,
-             strname, timname, Nproc, ind, H)
-
+#
+#method = 'max'
+#print("\n\n")
+#print(datetime.now())
+#print("\n")
+#print("COMPUTING DISCRETIZATION")
+#bden = mt.partition_main(filename_den+'_mean', denname,
+#                         depname, latname, lonname,
+#                         paramsname, ind, nl, N0, L0, timname,
+#                         method, plotname, nlsep, p,
+#                         (200, 1000), False,
+#                         H, L, U, g, den0,
+#                         Ekb, Re, Re4, tau0,
+#                         DT, tend, dtout, CLF)
+#
+#
+#print("\n\n")
+#print(datetime.now())
+#print("\n")
+#print("COMPUTING STRATIFICATION")
+#mt.stra_main(filename_den, filename_str, bden,
+#             denname, latname, lonname, depname,
+#             strname, timname, Nproc, ind, H)
+#
 #print("\n\n")
 #print(datetime.now())
 #print("\n")

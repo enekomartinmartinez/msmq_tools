@@ -67,6 +67,9 @@ def load_1file(filename, varnames, latname, lonname,
         if timname is not None:
             tim_in = data[timname].values
 
+    if len(lat_in.shape) == 1:
+        lon_in, lat_in = np.meshgrid(lon_in, lat_in)
+
     return vars_in, lat_in, lon_in, tim_in, dep_in
 
 

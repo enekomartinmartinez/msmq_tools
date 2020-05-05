@@ -86,7 +86,7 @@ def stra_1file(file_den, file_str, bpnt, denname, latname, lonname,
     strval = np.empty((dim[0], len(bpnt[0]), dim[2], dim[3]))
 
     for k, (h, p) in enumerate(zip(bpnt[0], bpnt[1])):
-        dind = np.logical_and(dep > h-300, dep < h+300)
+        dind = np.logical_and(dep > h-250, dep < h+250)
         denk, depk = den[:, dind], dep[dind]
         
         for t in range(dim[0]):
