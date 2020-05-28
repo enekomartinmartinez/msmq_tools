@@ -13,12 +13,12 @@ import pandas as pd
 ##########################################################################
 
 region = 'GULFSTREAMb'
-date_ini = datetime(2012, 11, 22, 0)
-date_fin = datetime(2013, 9, 30, 0)
+date_ini = datetime(2013, 3, 13, 0)
+date_fin = datetime(2013, 3, 31, 0)
 dates = pd.date_range(start=date_ini, end=date_fin)
 dates = dates.strftime('y%Ym%md%d')
 
-Nproc = 3
+Nproc = 1
 
 
 ##########################################################################
@@ -70,4 +70,10 @@ Nlim = 30
 mlat = 36.5
 mlon = -56.
 L0 = 1700000
+
+N0 = 256
+Nlim = 15
+mlat = 38.
+mlon = -57.5
+L0 = 1300000
 

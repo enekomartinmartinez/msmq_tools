@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import combinations
@@ -5,7 +6,7 @@ from msqg_tools.opends import load_1file
 
 
 def partition_main(filename, denname, depname, latname, lonname,
-                   savename, ind, nl, N, L0, timname=None,
+                   savename, nl, N, L0, timname=None,
                    method="max", plotname=None, nlsep=1, p=2,
                    depl=(0, 5000), inflay=False,
                    H=5000., L=50000., U=.1, g=9.81, den0=1029,
@@ -58,21 +59,27 @@ def partition_main(filename, denname, depname, latname, lonname,
     mden = np.mean(den, axis=0)
 
     # Defining minimum and maximum index to compute between
-    if depl[0] <= dep[0]:
-        imin = 1
-    else:
-        imin = np.min(np.where(dep >= depl[0]))
-
-    if depl[1] >= H:
-        imax = len(dep)
-    else:
-        imax = np.max(np.where(dep <= depl[1]))
+    if method != "dep":
+        if depl[0] <= dep[0]:
+            imin = 1
+        else:
+            imin = np.min(np.where(dep >= depl[0]))
+    
+        if depl[1] >= H:
+            imax = len(dep)
+        else:
+            imax = np.max(np.where(dep <= depl[1]))
 
     # Starts the method
     if method == "grad":
         ind = make_partition_grad(mden, dep, nl, nlsep, (imin, imax))
     elif method == "max":
         ind = make_partition_max(mden, nl, nlsep,  (imin, imax), p)
+    elif method == "dep":
+        ind = make_partition_dep(dep, depl)
+    else:
+        print("Method " + method + " is not supported")
+        sys.exit()
 
     # Adding first and last index to ind
     ind = np.insert(ind, (0, nl-1), [0, len(dep)]).astype(int)
@@ -135,6 +142,15 @@ def make_partition_max(mden, nl, nlsep, ilim, p):
             # if norm is bigger than current value save new combination
             maxval = norm
             ind = c
+    return ind
+
+
+def make_partition_dep(dep, depl):
+
+    ind = []
+    for pdep in depl:
+        ind.append(np.min(np.where(dep >= pdep)))
+    ind = np.sort(ind)
     return ind
 
 

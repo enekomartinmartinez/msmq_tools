@@ -13,12 +13,12 @@ import pandas as pd
 ##########################################################################
 
 region = 'OSMOSISb'
-date_ini = datetime(2012, 10, 1, 0)
-date_fin = datetime(2013, 9, 30, 0)
+date_ini = datetime(2013, 3, 16, 0)
+date_fin = datetime(2013, 3, 31, 0)
 dates = pd.date_range(start=date_ini, end=date_fin)
 dates = dates.strftime('y%Ym%md%d')
 
-Nproc = 2
+Nproc = 1
 
 
 ##########################################################################
@@ -66,6 +66,13 @@ timname = 'time'
 
 N0 = 512
 Nlim = 30
+mlat = 50.5
+mlon = -20.
+L0 = 1300000
+
+
+N0 = 256
+Nlim = 15
 mlat = 50.5
 mlon = -20.
 L0 = 1300000
