@@ -19,7 +19,7 @@ dates = pd.date_range(start=date_ini, end=date_fin)
 dates = dates.strftime('y%Ym%md%d')
 
 Nproc = 1
-
+Nb = (1, 10, 10)
 
 ##########################################################################
 #                            LOADING PARAMETERS                          #
@@ -39,11 +39,25 @@ Nproc = 1
 ##########################################################################
 
 path2data = '/mnt/meom/workdir/martiene/DATA/'+region+'/'
+path2uv = '/mnt/meom/workdir/martiene/DATA/EOSMO/speeds/'
 
 filenames_ssh = [path2data + 'NATL60-CJM165_' + region + '_'
                  + datei + '.1h_SSH' for datei in dates]
 
+filenames_u = [path2uv + 'NATL60EOSMO-CJM165_'
+               + datei + '.1h_vozocrtx' for datei in dates][:1]
+
+filenames_v = [path2uv + 'NATL60EOSMO-CJM165_'
+               + datei + '.1h_vomecrty' for datei in dates][:1]
+
+savename_u = [path2data + 'NATL60-CJM165_' + region + '_'
+              + datei + '.1h_vozocrtx' for datei in dates][:1]
+savename_v = [path2data + 'NATL60-CJM165_' + region + '_'
+              + datei + '.1h_vomecrty' for datei in dates][:1]
+
 sshname = 'sossheig'
+uname = 'vozocrtx'
+vname = 'vomecrty'
 latname = 'lat'
 lonname = 'lon'
 timname = 'time'

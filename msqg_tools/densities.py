@@ -54,24 +54,23 @@ def den_main(filename_tem, filename_sal, savename,
 
     # Get data from 1 file
     if ind is None:
-        mp = [den_1file(filename_tem, filename_sal, savename,
-                        temname, salname, depname,
-                        denname, latname, lonname,
-                        pressure_lvl, mlat, timname)]
+        den_1file(filename_tem, filename_sal, savename,
+                  temname, salname, depname,
+                  denname, latname, lonname,
+                  pressure_lvl, mlat, timname)
 
     # Get data from splitted files
     else:
-        mp = []
 
         def den_kji(kji):
             k, j, i = kji
             fname_tem = filename_tem+'_'+str(k)+'_'+str(j)+'_'+str(i)
             fname_sal = filename_sal+'_'+str(k)+'_'+str(j)+'_'+str(i)
             fsave_den = savename+'_'+str(k)+'_'+str(j)+'_'+str(i)
-            mp.append(den_1file(fname_tem, fname_sal, fsave_den,
-                                temname, salname, depname, denname,
-                                latname, lonname, pressure_lvl,
-                                mlat, timname))
+            den_1file(fname_tem, fname_sal, fsave_den,
+                      temname, salname, depname, denname,
+                      latname, lonname, pressure_lvl,
+                      mlat, timname)
             return 1
 
         # Get iterables for the 3 index and call combinations
@@ -105,8 +104,8 @@ def den_main(filename_tem, filename_sal, savename,
 
 
 def den_1file(filename_tem, filename_sal, savename, temname,
-              salname, depname, denname, latname, lonname, pressure_lvl,
-              mlat, timname):
+              salname, depname, denname, latname, lonname,
+              pressure_lvl, mlat, timname):
     """
     Computes the density profile from a given file.
     Check the documentation of den_main for more information.

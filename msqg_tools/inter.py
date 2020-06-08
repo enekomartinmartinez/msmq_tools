@@ -10,7 +10,7 @@ def int_main(filenames, varnames,
              latname, lonname, mlat, mlon,
              L0, N0=512, Nlim=0,
              depname=None, timname=None,
-             method='cubic', Nproc=1, parallel='time'):
+             method='cubic', Nproc=1, parallel='time', ind=None):
 
     N = N0 - 2*Nlim
     DX = L0 / N0
@@ -33,14 +33,14 @@ def int_main(filenames, varnames,
         int_1file(filenames, varnames, latname,
                   lonname, depname, timname,
                   lat_out, lat_outr, lon_out, lon_outr,
-                  N, method, Nproc, parallel)
+                  N, method, Nproc, parallel, ind)
 
     else:
         def int_f(filename):
             int_1file(filename, varnames, latname,
                       lonname, depname, timname,
                       lat_out, lat_outr, lon_out, lon_outr,
-                      N, method, Nproc, parallel)
+                      N, method, Nproc, parallel, ind)
             return 1
 
         totl = len(filenames)
@@ -66,7 +66,7 @@ def int_main(filenames, varnames,
 
 def int_1file(filename, varnames, latname, lonname, depname, timname,
               lat_out, lat_outr, lon_out, lon_outr,
-              N, method, Nproc, parallel):
+              N, method, Nproc, parallel, ind):
 
     #############
     # LOAD DATA #
@@ -75,7 +75,8 @@ def int_1file(filename, varnames, latname, lonname, depname, timname,
 
     vars_in, lat_in, lon_in, tim, deps = load_main(filename, varnames,
                                                    latname, lonname,
-                                                   depname, timname)
+                                                   depname, timname,
+                                                   ind)
 
     NT = vars_in[0].shape[0]
     NL = []

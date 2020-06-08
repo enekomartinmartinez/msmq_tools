@@ -10,7 +10,7 @@ mpl.use('Agg')
 params_file = str(sys.argv[1])
 exec(open(params_file).read())
 
-#ind = [np.arange(nb) for nb in Nb]
+ind = [np.arange(nb) for nb in Nb]
 gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 
 print("\n\n")
@@ -22,6 +22,34 @@ mt.int_main(filenames_ssh, [sshname],
             L0, N0, Nlim,
             None, timname,
             'cubic', Nproc, parallel='time')
+
+print("\n\n")
+print(datetime.now())
+print("\n")
+print("INTERPOLATING U, V DATA")
+for filei, sname in zip(filenames_u, savename_u):
+    mt.vaverage_main(filei, sname, uname, latname, lonname,
+                     depname, timname, (500, 4500),
+                     Nproc, ind)
+
+mt.int_main(savename_u, [uname],
+            latname, lonname, mlat, mlon,
+            L0, N0, Nlim,
+            None, timname,
+            'cubic', Nproc,
+            parallel='time', ind)
+
+for filei, sname in zip(filenames_v, savename_v):
+    mt.vaverage_main(filei, sname, vname, latname, lonname,
+                     depname, timname, (500, 4500),
+                     Nproc, ind)
+
+mt.int_main(savename_v, [vname],
+            latname, lonname, mlat, mlon,
+            L0, N0, Nlim,
+            None, timname,
+            'cubic', Nproc,
+            parallel='time', ind)
 
 # SPLITTING S AND T DATA
 # Computed in other machine
