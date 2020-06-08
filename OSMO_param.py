@@ -13,8 +13,8 @@ import pandas as pd
 ##########################################################################
 
 region = 'OSMOSISb'
-date_ini = datetime(2013, 3, 16, 0)
-date_fin = datetime(2013, 3, 31, 0)
+date_ini = datetime(2012, 10, 1, 0)
+date_fin = datetime(2013, 9, 30, 0)
 dates = pd.date_range(start=date_ini, end=date_fin)
 dates = dates.strftime('y%Ym%md%d')
 
