@@ -7,3 +7,4 @@ from msqg_tools.discretization import partition_main
 from msqg_tools.stratification import stra_main
 from msqg_tools.generini import genini_main
 from msqg_tools.vaverage import vaverage_main
+from msqg_tools.topography import topo_main
