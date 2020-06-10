@@ -113,7 +113,7 @@ method = 'max'
 plotname = region + '_' + dates[0] + '.png'
 paramsname = region + '_' + dates[0] + '_params.in'
 p = 2
-depl = (500, 2000)
+depl = (50, 2000)
 nlsep = 1
 nl = 2
 

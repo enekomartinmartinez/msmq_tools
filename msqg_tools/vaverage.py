@@ -107,9 +107,14 @@ def vaverage_1file(filename, savename, varname, latname, lonname,
 
     ind = np.logical_and(dep >= interval[0], dep <= interval[1])
 
-    h = np.gardient(dep)[ind]
+    sh = var.shape
+    h = np.gradient(dep)[ind][None, :, None, None]
+    h = np.tile(h , (sh[0], 1, sh[2], sh[3]))
     var = var[:, ind]
-    av_var = np.average(var, weights=h, axis=1)
+    isnan = np.isnan(var)
+    h[isnan] = 0
+    var[isnan] = 0
+    av_var = np.sum(h * var, axis=1) / np.sum(h, axis=1)
 
     #############
     # SAVE DATA #

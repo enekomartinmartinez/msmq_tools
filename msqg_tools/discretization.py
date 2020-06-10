@@ -74,7 +74,7 @@ def partition_main(filename, denname, depname, latname, lonname,
     if method == "grad":
         ind = make_partition_grad(mden, dep, nl, nlsep, (imin, imax))
     elif method == "max":
-        ind = make_partition_max(mden, nl, nlsep,  (imin, imax), p)
+        ind = make_partition_max(mden, dep, nl, nlsep,  (imin, imax), p)
     elif method == "dep":
         ind = make_partition_dep(dep, depl)
     else:
@@ -124,10 +124,11 @@ def make_partition_grad(mden, dep, nl, nlsep, ilim):
     return ind
 
 
-def make_partition_max(mden, nl, nlsep, ilim, p):
+def make_partition_max(mden, dep, nl, nlsep, ilim, p):
 
     # Generate combinations of partitions
     comb = combinations(np.arange(ilim[0], ilim[1]), nl-1)
+    deltah = np.gradient(dep)
     maxval = 0
     for c in comb:
         if np.any(np.diff(c) <= nlsep):
@@ -135,7 +136,7 @@ def make_partition_max(mden, nl, nlsep, ilim, p):
             continue
         # split and compute the mean values norm
         sh = np.split(deltah, c)
-        sp = np.split(den, c)
+        sp = np.split(mden, c)
         msp = np.array([np.average(p, weights=h) for p, h in zip(sp, sh)])
         norm = np.sum(np.diff(msp)**p)
         if norm > maxval:

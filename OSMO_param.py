@@ -13,8 +13,8 @@ import pandas as pd
 ##########################################################################
 
 region = 'OSMOSISb'
-date_ini = datetime(2012, 10, 1, 0)
-date_fin = datetime(2013, 9, 30, 0)
+date_ini = datetime(2013, 3, 1, 0)
+date_fin = datetime(2013, 3, 7, 0)
 dates = pd.date_range(start=date_ini, end=date_fin)
 dates = dates.strftime('y%Ym%md%d')
 
@@ -45,22 +45,23 @@ filenames_ssh = [path2data + 'NATL60-CJM165_' + region + '_'
                  + datei + '.1h_SSH' for datei in dates]
 
 filenames_u = [path2uv + 'NATL60EOSMO-CJM165_'
-               + datei + '.1h_vozocrtx' for datei in dates][:1]
+               + datei + '.1d_vozocrtx' for datei in dates]
 
 filenames_v = [path2uv + 'NATL60EOSMO-CJM165_'
-               + datei + '.1h_vomecrty' for datei in dates][:1]
+               + datei + '.1d_vomecrty' for datei in dates]
 
 savename_u = [path2data + 'NATL60-CJM165_' + region + '_'
-              + datei + '.1h_vozocrtx' for datei in dates][:1]
+              + datei + '.1d_vozocrtx' for datei in dates]
 savename_v = [path2data + 'NATL60-CJM165_' + region + '_'
-              + datei + '.1h_vomecrty' for datei in dates][:1]
+              + datei + '.1d_vomecrty' for datei in dates]
 
 sshname = 'sossheig'
 uname = 'vozocrtx'
 vname = 'vomecrty'
-latname = 'lat'
-lonname = 'lon'
-timname = 'time'
+latname = 'nav_lat'
+lonname = 'nav_lon'
+depname = 'deptht'
+timname = 'time_counter'
 
 
 ##########################################################################

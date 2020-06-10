@@ -13,15 +13,15 @@ exec(open(params_file).read())
 ind = [np.arange(nb) for nb in Nb]
 gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 
-print("\n\n")
-print(datetime.now())
-print("\n")
-print("INTERPOLATING SSH DATA")
-mt.int_main(filenames_ssh, [sshname],
-            latname, lonname, mlat, mlon,
-            L0, N0, Nlim,
-            None, timname,
-            'cubic', Nproc, parallel='time')
+#print("\n\n")
+#print(datetime.now())
+#print("\n")
+#print("INTERPOLATING SSH DATA")
+#mt.int_main(filenames_ssh, [sshname],
+#            latname, lonname, mlat, mlon,
+#            L0, N0, Nlim,
+#            None, timname,
+#            'cubic', Nproc, parallel='time')
 
 print("\n\n")
 print(datetime.now())
@@ -29,7 +29,7 @@ print("\n")
 print("INTERPOLATING U, V DATA")
 for filei, sname in zip(filenames_u, savename_u):
     mt.vaverage_main(filei, sname, uname, latname, lonname,
-                     depname, timname, (500, 4500),
+                     depname, timname, (186, 6000),
                      Nproc, ind)
 
 mt.int_main(savename_u, [uname],
@@ -37,11 +37,11 @@ mt.int_main(savename_u, [uname],
             L0, N0, Nlim,
             None, timname,
             'cubic', Nproc,
-            parallel='time', ind)
+            parallel='time', ind=ind)
 
 for filei, sname in zip(filenames_v, savename_v):
     mt.vaverage_main(filei, sname, vname, latname, lonname,
-                     depname, timname, (500, 4500),
+                     depname, timname, (186, 6000),
                      Nproc, ind)
 
 mt.int_main(savename_v, [vname],
@@ -49,7 +49,7 @@ mt.int_main(savename_v, [vname],
             L0, N0, Nlim,
             None, timname,
             'cubic', Nproc,
-            parallel='time', ind)
+            parallel='time', ind=ind)
 
 # SPLITTING S AND T DATA
 # Computed in other machine
@@ -95,7 +95,7 @@ mt.int_main(savename_v, [vname],
 #                         Ekb, Re, Re4, tau0,
 #                         DT, tend, dtout, CLF)
 #
-#
+
 #print("\n\n")
 #print(datetime.now())
 #print("\n")
