@@ -23,33 +23,42 @@ gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 #            None, timname,
 #            'cubic', Nproc, parallel='time')
 
-print("\n\n")
-print(datetime.now())
-print("\n")
-print("INTERPOLATING U, V DATA")
-for filei, sname in zip(filenames_u, savename_u):
-    mt.vaverage_main(filei, sname, uname, latname, lonname,
-                     depname, timname, (186, 6000),
-                     Nproc, ind)
+#print("\n\n")
+#print(datetime.now())
+#print("\n")
+#print("INTERPOLATING U, V DATA")
 
-mt.int_main(savename_u, [uname],
-            latname, lonname, mlat, mlon,
-            L0, N0, Nlim,
-            None, timname,
-            'cubic', Nproc,
-            parallel='time', ind=ind)
+filetopo = '/mnt/meom/workdir/martiene/DATA/OSMOSISb/NATL60-CJM165_OSMOSISb_mbathy'
+mt.topo_main(filetopo, 'save', 'mbathy', latname, lonname,
+             'nav_lev', timname)
 
-for filei, sname in zip(filenames_v, savename_v):
-    mt.vaverage_main(filei, sname, vname, latname, lonname,
-                     depname, timname, (186, 6000),
-                     Nproc, ind)
-
-mt.int_main(savename_v, [vname],
-            latname, lonname, mlat, mlon,
-            L0, N0, Nlim,
-            None, timname,
-            'cubic', Nproc,
-            parallel='time', ind=ind)
+#print("\n\n")
+#print(datetime.now())
+#print("\n")
+#print("INTERPOLATING U, V DATA")
+#for filei, sname in zip(filenames_u, savename_u):
+#    mt.vaverage_main(filei, sname, uname, latname, lonname,
+#                     depname, timname, (186, 6000),
+#                     Nproc, ind)
+#
+#mt.int_main(savename_u, [uname],
+#            latname, lonname, mlat, mlon,
+#            L0, N0, Nlim,
+#            None, timname,
+#            'cubic', Nproc,
+#            parallel='time', ind=ind)
+#
+#for filei, sname in zip(filenames_v, savename_v):
+#    mt.vaverage_main(filei, sname, vname, latname, lonname,
+#                     depname, timname, (186, 6000),
+#                     Nproc, ind)
+#
+#mt.int_main(savename_v, [vname],
+#            latname, lonname, mlat, mlon,
+#            L0, N0, Nlim,
+#            None, timname,
+#            'cubic', Nproc,
+#            parallel='time', ind=ind)
 
 # SPLITTING S AND T DATA
 # Computed in other machine

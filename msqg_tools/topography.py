@@ -1,10 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jun 10 17:13:01 2020
-
-@author: eneko
-"""
+import numpy as np
+import xarray as xr
+from msqg_tools.opends import load_main
 
 def topo_main(filename, savename, varname, latname, lonname,
               depname, timname):
@@ -39,7 +35,7 @@ def topo_main(filename, savename, varname, latname, lonname,
     None.
     """
 
-    bathy, lat, lon, tim, dep = load_main(filename, [varname], latname,
+    [bathy], lat, lon, tim, dep = load_main(filename, [varname], latname,
                                           lonname, depname, timname)
 
     sh = bathy.shape
@@ -50,6 +46,6 @@ def topo_main(filename, savename, varname, latname, lonname,
     topo = np.empty_like(bathy)
     for i in range(sh[0]):
         for j in range(sh[1]):
-            topo[i, j] = dep[bathy[i, j]]
+            topo[i, j] = dep[int(bathy[i, j])]
 
     print(np.mean(topo))
