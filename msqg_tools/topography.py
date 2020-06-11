@@ -2,8 +2,9 @@ import numpy as np
 import xarray as xr
 from msqg_tools.opends import load_main
 
-def topo_main(filename, savename, varname, latname, lonname,
-              depname, timname):
+
+def topo_main(filename, savename, varname, topname,
+              latname, lonname, depname, timname):
     """
     Creates a mask of are values for a file or a set of splitted files.
     If one file is used this can be automatically splitted using ind_out.
@@ -36,7 +37,7 @@ def topo_main(filename, savename, varname, latname, lonname,
     """
 
     [bathy], lat, lon, tim, dep = load_main(filename, [varname], latname,
-                                          lonname, depname, timname)
+                                            lonname, depname, timname)
 
     sh = bathy.shape
     if len(sh) == 3:
@@ -48,4 +49,8 @@ def topo_main(filename, savename, varname, latname, lonname,
         for j in range(sh[1]):
             topo[i, j] = dep[int(bathy[i, j])]
 
-    print(np.mean(topo))
+    print("Main depth: ", np.mean(topo))
+    ds = xr.Dataset({lonname: (('y', 'x'), lon),
+                     latname: (('y', 'x'), lat),
+                     topname: (('y', 'x'), topo)})
+    ds.to_netcdf(savename+'.nc')

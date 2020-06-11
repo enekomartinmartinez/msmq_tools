@@ -28,9 +28,17 @@ gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 #print("\n")
 #print("INTERPOLATING U, V DATA")
 
-filetopo = '/mnt/meom/workdir/martiene/DATA/OSMOSISb/NATL60-CJM165_OSMOSISb_mbathy'
-mt.topo_main(filetopo, 'save', 'mbathy', latname, lonname,
-             'nav_lev', timname)
+mt.topo_main(filetopo, filebati, batname, topname,
+             latname, lonname, 'nav_lev', timname)
+
+mt.int_main([filetopo], [topname],
+            latname, lonname, mlat, mlon,
+            L0, N0, Nlim,
+            None, timname,
+            'cubic', Nproc, parallel='time')
+
+mt.genini_main(filetopo, [topname], latname, lonname, mlat, mlon,
+               L0, N0, Nlim, bvalue)
 
 #print("\n\n")
 #print(datetime.now())

@@ -4,7 +4,7 @@ from msqg_tools.opends import load_1file
 
 
 def genini_main(filename, varnames, latname, lonname, mlat, mlon,
-                L0, N0=512, Nlim=0):
+                L0, N0=512, Nlim=0, bvalue=0):
 
     #############
     # LOAD DATA #
@@ -33,21 +33,25 @@ def genini_main(filename, varnames, latname, lonname, mlat, mlon,
     #####################
 
     lin1 = np.linspace(0, 1, Nlim, endpoint=False)
-    lin2 = np.linspace(1, 0, Nlim, endpoint=False)
+    lin2 = lin1[::-1]
     for i in range(len(vars_out)):
         vars_out[i][:, Nlim:(N0-Nlim), Nlim:(N0-Nlim)] = vars_in[i][:1]
         vars_out[i][:, :Nlim, :] =\
             vars_out[i][:, Nlim, :][:, np.newaxis, :]\
-            * lin1[np.newaxis, :, np.newaxis]
+            * lin1[np.newaxis, :, np.newaxis]\
+            + bvalue * lin2[np.newaxis, :, np.newaxis]
         vars_out[i][:, :, :Nlim] =\
             vars_out[i][:, :, Nlim][:, :, np.newaxis]\
-            * lin1[np.newaxis, np.newaxis, :]
+            * lin1[np.newaxis, np.newaxis, :]\
+            + bvalue * lin2[np.newaxis, np.newaxis, :]
         vars_out[i][:, -Nlim:, :] =\
             vars_out[i][:, N0-Nlim-1, :][:, np.newaxis, :]\
-            * lin2[np.newaxis, :, np.newaxis]
+            * lin2[np.newaxis, :, np.newaxis]\
+            + bvalue * lin1[np.newaxis, :, np.newaxis]
         vars_out[i][:, :, -Nlim:] =\
             vars_out[i][:, :, N0-Nlim-1][:, :, np.newaxis]\
-            * lin2[np.newaxis, np.newaxis, :]
+            * lin2[np.newaxis, np.newaxis, :]\
+            + bvalue * lin1[np.newaxis, np.newaxis, :]
 
     #############
     # SAVE DATA #
