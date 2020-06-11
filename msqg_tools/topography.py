@@ -40,17 +40,19 @@ def topo_main(filename, savename, varname, topname,
                                             lonname, depname, timname)
 
     sh = bathy.shape
-    if len(sh) == 3:
-        bathy = bathy[0]
-        sh = (sh[1], sh[2])
+    if len(sh) == 2:
+        bathy = bathy[None, :, :]
+        sh = bathy.shape
+
 
     topo = np.empty_like(bathy)
-    for i in range(sh[0]):
-        for j in range(sh[1]):
-            topo[i, j] = dep[int(bathy[i, j])]
+    for i in range(sh[1]):
+        for j in range(sh[2]):
+            topo[:, i, j] = dep[int(bathy[0, i, j])]
 
     print("Main depth: ", np.mean(topo))
-    ds = xr.Dataset({lonname: (('y', 'x'), lon),
+    ds = xr.Dataset({timname:(('t'), tim),
+                     lonname: (('y', 'x'), lon),
                      latname: (('y', 'x'), lat),
-                     topname: (('y', 'x'), topo)})
+                     topname: (('t','y', 'x'), topo)})
     ds.to_netcdf(savename+'.nc')
