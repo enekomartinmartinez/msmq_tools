@@ -216,7 +216,7 @@ def get_params(dep, den, ind, mlat, inflay,
 
 
 def plot_dis(plotname, den, dep, ind, H):
-
+    plt.figure(figsize=[6.4, 3.2])
     plt.plot(den, dep, label="mean profile")
     label2 = "discretization"
     for i in range(len(ind)-1):
@@ -224,9 +224,13 @@ def plot_dis(plotname, den, dep, ind, H):
         plt.vlines(mdeni, dep[ind[i]], dep[ind[i+1]-1],
                    label=label2, ls=':')
         label2 = None
+    for i in range(len(ind)-2):
+        plt.hlines(dep[ind[i+1]], np.min(den), np.max(den), color="black")
     plt.ylabel(r"Depth ($m$)")
     plt.xlabel(r"Potetial density ($kg\,m^{-3}$)")
     plt.ylim(H, 0)
+    #plt.xlim(np.min(den), np.max(den))
+    plt.tight_layout()
     plt.savefig(plotname)
     plt.close()
     print(plotname+' saved')

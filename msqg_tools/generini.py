@@ -32,7 +32,7 @@ def genini_main(filename, varnames, latname, lonname, mlat, mlon,
     # CREATE BOUNDARIES #
     #####################
 
-    lin1 = np.linspace(0, 1, Nlim, endpoint=False)
+    lin1 = np.linspace(0, 1, Nlim, endpoint=True)
     lin2 = lin1[::-1]
     for i in range(len(vars_out)):
         vars_out[i][:, Nlim:(N0-Nlim), Nlim:(N0-Nlim)] = vars_in[i][:1]

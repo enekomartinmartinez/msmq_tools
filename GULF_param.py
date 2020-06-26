@@ -56,8 +56,8 @@ savename_u = [path2data + 'NATL60-CJM165_' + region + '_'
 savename_v = [path2data + 'NATL60-CJM165_' + region + '_'
               + datei + '.1d_vomecrty' for datei in dates]
 
-filetopo = path2data + 'NATL60-CJM165_'+region+'_mbathy'
-filebati = path2data + 'NATL60-CJM165_'+region+'_topo'
+filebati = path2data + 'NATL60-CJM165_'+region+'_mbathy'
+filetopo = path2data + 'NATL60-CJM165_'+region+'_topo'
 
 
 sshname = 'sossheig'
@@ -67,6 +67,7 @@ latname = 'nav_lat'
 lonname = 'nav_lon'
 depname = 'deptht'
 batname = 'mbathy'
+topname = 'topo'
 timname = 'time_counter'
 
 
@@ -96,3 +97,4 @@ Nlim = 15
 mlat = 38.
 mlon = -57.5
 L0 = 1300000
+H = 4900

@@ -26,47 +26,47 @@ gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 #print("\n\n")
 #print(datetime.now())
 #print("\n")
-#print("INTERPOLATING U, V DATA")
+#print("CREATING TOPOGRAPHY FILES")
 
-mt.topo_main(filetopo, filebati, batname, topname,
-             latname, lonname, 'nav_lev', timname)
+#mt.topo_main(filebati, filetopo, batname, topname,
+#             latname, lonname, 'nav_lev', timname)
+#
+#mt.int_main([filetopo], [topname],
+#            latname, lonname, mlat, mlon,
+#            L0, N0, Nlim,
+#            None, timname,
+#            'cubic', Nproc, parallel='time')
+#
+#mt.genini_main(filetopo, [topname], latname, lonname, mlat, mlon,
+#               L0, N0, Nlim, H)
 
-mt.int_main([filetopo], [topname],
+print("\n\n")
+print(datetime.now())
+print("\n")
+print("INTERPOLATING U, V DATA")
+for filei, sname in zip(filenames_u, savename_u):
+    mt.vaverage_main(filei, sname, uname, latname, lonname,
+                     depname, timname, (200, 5000),
+                     Nproc, ind)
+
+mt.int_main(savename_u, [uname],
             latname, lonname, mlat, mlon,
             L0, N0, Nlim,
             None, timname,
-            'cubic', Nproc, parallel='time')
+            'cubic', Nproc,
+            parallel='time', ind=ind)
 
-mt.genini_main(filetopo, [topname], latname, lonname, mlat, mlon,
-               L0, N0, Nlim, bvalue)
+for filei, sname in zip(filenames_v, savename_v):
+    mt.vaverage_main(filei, sname, vname, latname, lonname,
+                     depname, timname, (200, 5000),
+                     Nproc, ind)
 
-#print("\n\n")
-#print(datetime.now())
-#print("\n")
-#print("INTERPOLATING U, V DATA")
-#for filei, sname in zip(filenames_u, savename_u):
-#    mt.vaverage_main(filei, sname, uname, latname, lonname,
-#                     depname, timname, (186, 6000),
-#                     Nproc, ind)
-#
-#mt.int_main(savename_u, [uname],
-#            latname, lonname, mlat, mlon,
-#            L0, N0, Nlim,
-#            None, timname,
-#            'cubic', Nproc,
-#            parallel='time', ind=ind)
-#
-#for filei, sname in zip(filenames_v, savename_v):
-#    mt.vaverage_main(filei, sname, vname, latname, lonname,
-#                     depname, timname, (186, 6000),
-#                     Nproc, ind)
-#
-#mt.int_main(savename_v, [vname],
-#            latname, lonname, mlat, mlon,
-#            L0, N0, Nlim,
-#            None, timname,
-#            'cubic', Nproc,
-#            parallel='time', ind=ind)
+mt.int_main(savename_v, [vname],
+            latname, lonname, mlat, mlon,
+            L0, N0, Nlim,
+            None, timname,
+            'cubic', Nproc,
+            parallel='time', ind=ind)
 
 # SPLITTING S AND T DATA
 # Computed in other machine
