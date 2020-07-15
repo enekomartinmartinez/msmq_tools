@@ -5,6 +5,8 @@ Created on Fri Jun 26 15:41:38 2020
 
 @author: eneko
 """
+from datetime import datetime
+import pandas as pd
 
 ##########################################################################
 #                            GENERAL PARAMETERS                          #
@@ -20,13 +22,15 @@ Created on Fri Jun 26 15:41:38 2020
 ##########################################################################
 
 region = 'OSMOSISc'
+region2 = 'OSMOSISb'
 date_ini = datetime(2013, 3, 1, 0)
 date_fin = datetime(2013, 3, 15, 0)
-dates_finuv = datetime(2013, 3, 7, 0)
+date_finuv = datetime(2013, 3, 7, 0)
 dates = pd.date_range(start=date_ini, end=date_fin)
 dates = dates.strftime('y%Ym%md%d')
 datesuv = pd.date_range(start=date_ini, end=date_finuv)
-datesuv = dates.strftime('y%Ym%md%d')
+datesuv = datesuv.strftime('y%Ym%md%d')
+date0 = dates[0]
 
 Nproc = 1
 Nb = (1, 10, 10)
@@ -51,21 +55,21 @@ Nb = (1, 10, 10)
 #     Name of the depth variable to be loaded                            #
 ##########################################################################
 
-path2data = '/mnt/meom/workdir/martiene/DATA/E'+region+'/'
+path2data = '/mnt/meom/workdir/martiene/DATA/'+region+'/'
 path2uv = '/mnt/meom/workdir/martiene/DATA/EOSMO/speeds/'
 
-filename_tem = path2data + 'NATL60E' + region + '-CJM165_'\
+filename_tem = path2data + 'NATL60E' + region2 + '-CJM165_'\
                + date0 + '.1d_votemper'
-filename_sal = path2data + 'NATL60E' + region + '-CJM165_'\
+filename_sal = path2data + 'NATL60E' + region2 + '-CJM165_'\
                + date0 + '.1d_vosaline'
-filename_den = path2data + 'NATL60E' + region + '-CJM165_'\
+filename_den = path2data + 'NATL60E' + region2 + '-CJM165_'\
                + date0 + '.1d_pdens'
-filename_str = path2data + 'NATL60E' + region + '-CJM165_'\
+filename_str = path2data + 'NATL60E' + region2 + '-CJM165_'\
                + date0 + '.1d_strheig'
-filename_mas = path2data + 'NATL60E' + region + '-CJM165_'\
+filename_mas = path2data + 'NATL60E' + region2 + '-CJM165_'\
                + 'mask'
 
-filenames_ssh = [path2data + 'NATL60-CJM165_' + region + '_'
+filenames_ssh = [path2data + 'NATL60-CJM165_' + region2 + '_'
                  + datei + '.1h_SSH' for datei in dates]
 
 filenames_u = [path2uv + 'NATL60EOSMO-CJM165_'
@@ -79,19 +83,19 @@ savename_u = [path2data + 'NATL60-CJM165_' + region + '_'
 savename_v = [path2data + 'NATL60-CJM165_' + region + '_'
               + datei + '.1d_vomecrty' for datei in datesuv]
 
-filetopo = path2data + 'NATL60-CJM165_'+region+'_mbathy'
-filebati = path2data + 'NATL60-CJM165_'+region+'_topo'
+filebati = path2data + 'NATL60-CJM165_'+region2+'_mbathy'
+filetopo = path2data + 'NATL60-CJM165_'+region2+'_topo'
 
 
 sshname = 'sossheig'
 uname = 'vozocrtx'
 vname = 'vomecrty'
-latname = 'nav_lat'
-lonname = 'nav_lon'
+latname = 'lat'
+lonname = 'lon'
 depname = 'deptht'
 batname = 'mbathy'
 topname = 'topo'
-timname = 'time_counter'
+timname = 'time'
 
 
 
@@ -111,10 +115,10 @@ timname = 'time_counter'
 ##########################################################################
 
 N0 = 256
-Nlim = 15
+Nlim = 28
 mlat = 48.5
 mlon = -20.5
-L0 = 750000
+L0 = 800000
 
 ##########################################################################
 #                      DISCRETIZATION PARAMETERS                         #
@@ -175,7 +179,7 @@ nl = 2
 #     CFL constant                                                       #
 ##########################################################################
 
-H = 4500.
+H = 4200.
 L = 50000.
 U = .1
 g = 9.81

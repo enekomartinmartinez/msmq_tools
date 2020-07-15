@@ -13,8 +13,8 @@ import pandas as pd
 ##########################################################################
 
 region = 'OSMOSISb'
-date_ini = datetime(2013, 3, 1, 0)
-date_fin = datetime(2013, 3, 7, 0)
+date_ini = datetime(2013, 2, 20, 0)
+date_fin = datetime(2013, 2, 20, 0)
 dates = pd.date_range(start=date_ini, end=date_fin)
 dates = dates.strftime('y%Ym%md%d')
 
@@ -62,12 +62,12 @@ filetopo = path2data + 'NATL60-CJM165_'+region+'_topo'
 sshname = 'sossheig'
 uname = 'vozocrtx'
 vname = 'vomecrty'
-latname = 'nav_lat'
-lonname = 'nav_lon'
+latname = 'lat'
+lonname = 'lon'
 depname = 'deptht'
 batname = 'mbathy'
 topname = 'topo'
-timname = 'time_counter'
+timname = 'time'
 
 
 ##########################################################################

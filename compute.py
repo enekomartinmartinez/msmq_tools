@@ -13,21 +13,21 @@ exec(open(params_file).read())
 ind = [np.arange(nb) for nb in Nb]
 gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 
-#print("\n\n")
-#print(datetime.now())
-#print("\n")
-#print("INTERPOLATING SSH DATA")
-#mt.int_main(filenames_ssh, [sshname],
-#            latname, lonname, mlat, mlon,
-#            L0, N0, Nlim,
-#            None, timname,
-#            'cubic', Nproc, parallel='time')
+print("\n\n")
+print(datetime.now())
+print("\n")
+print("INTERPOLATING SSH DATA")
+mt.int_main(filenames_ssh, [sshname],
+            latname, lonname, mlat, mlon,
+            L0, N0, Nlim,
+            None, timname,
+            'cubic', Nproc, parallel='time')
 
 #print("\n\n")
 #print(datetime.now())
 #print("\n")
 #print("CREATING TOPOGRAPHY FILES")
-
+#
 #mt.topo_main(filebati, filetopo, batname, topname,
 #             latname, lonname, 'nav_lev', timname)
 #
@@ -40,33 +40,33 @@ gridval = [mlon-3, mlon+3, mlat-3, mlat+3]
 #mt.genini_main(filetopo, [topname], latname, lonname, mlat, mlon,
 #               L0, N0, Nlim, H)
 
-print("\n\n")
-print(datetime.now())
-print("\n")
-print("INTERPOLATING U, V DATA")
-for filei, sname in zip(filenames_u, savename_u):
-    mt.vaverage_main(filei, sname, uname, latname, lonname,
-                     depname, timname, (200, 5000),
-                     Nproc, ind)
-
-mt.int_main(savename_u, [uname],
-            latname, lonname, mlat, mlon,
-            L0, N0, Nlim,
-            None, timname,
-            'cubic', Nproc,
-            parallel='time', ind=ind)
-
-for filei, sname in zip(filenames_v, savename_v):
-    mt.vaverage_main(filei, sname, vname, latname, lonname,
-                     depname, timname, (200, 5000),
-                     Nproc, ind)
-
-mt.int_main(savename_v, [vname],
-            latname, lonname, mlat, mlon,
-            L0, N0, Nlim,
-            None, timname,
-            'cubic', Nproc,
-            parallel='time', ind=ind)
+#print("\n\n")
+#print(datetime.now())
+#print("\n")
+#print("INTERPOLATING U, V DATA")
+#for filei, sname in zip(filenames_u, savename_u):
+#    mt.vaverage_main(filei, sname, uname, latname, lonname,
+#                     depname, timname, (185, 4200),
+#                     Nproc, ind)
+#
+#mt.int_main(savename_u, [uname],
+#            latname, lonname, mlat, mlon,
+#            L0, N0, Nlim,
+#            None, timname,
+#            'cubic', Nproc,
+#            parallel='time', ind=ind)
+#
+#for filei, sname in zip(filenames_v, savename_v):
+#    mt.vaverage_main(filei, sname, vname, latname, lonname,
+#                     depname, timname, (184, 4200),
+#                     Nproc, ind)
+#
+#mt.int_main(savename_v, [vname],
+#            latname, lonname, mlat, mlon,
+#            L0, N0, Nlim,
+#            None, timname,
+#            'cubic', Nproc,
+#            parallel='time', ind=ind)
 
 # SPLITTING S AND T DATA
 # Computed in other machine
@@ -121,12 +121,12 @@ mt.int_main(savename_v, [vname],
 #             denname, latname, lonname, depname,
 #             strname, timname, Nproc, ind, H)
 #
-#print("\n\n")
-#print(datetime.now())
-#print("\n")
-#print("COMPUTING INI FILE")
-#mt.genini_main(filenames_ssh[0], [sshname], latname, lonname, mlat, mlon,
-#               L0, N0, Nlim)
+print("\n\n")
+print(datetime.now())
+print("\n")
+print("COMPUTING INI FILE")
+mt.genini_main(filenames_ssh[0], [sshname], latname, lonname, mlat, mlon,
+               L0, N0, Nlim)
 
 
 print("\n\n")
